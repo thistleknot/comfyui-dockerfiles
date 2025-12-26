@@ -1,0 +1,17 @@
+# Manual package fixes for nodes with incomplete requirements.txt
+# Add packages here when you see import errors in logs
+
+# OpenCV (required by many nodes)
+opencv-python
+opencv-python-headless
+
+# Missing from various nodes
+openai-agents
+deepdiff
+matplotlib
+accelerate
+gguf
+compel
+
+# Fix huggingface_hub compatibility
+diffusers>=0.30.0

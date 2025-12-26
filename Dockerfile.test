@@ -1,0 +1,16 @@
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 python3.12-venv python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python3.12 -m venv /venv
+
+# Test cache ID persistence
+RUN --mount=type=cache,target=/pip-cache,id=test-cache \
+    /venv/bin/pip install \
+        --cache-dir=/pip-cache \
+        torch==2.6.0 torchvision==0.21.0 \
+        --index-url https://download.pytorch.org/whl/cu126
+
+CMD ["bash"]

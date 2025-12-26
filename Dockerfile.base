@@ -1,1 +1,28 @@
-../Dockerfile.base
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+
+# Layer 0: System packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 python3.12-dev python3.12-venv python3-pip \
+    git cmake build-essential \
+    portaudio19-dev libportaudio2 \
+    ffmpeg libsm6 libxext6 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Layer 1: PyTorch 2.6.0 + flash-attn + UV
+RUN --mount=type=cache,target=/mnt/external/pip-cache,id=pip-external \
+    python3.12 -m venv /venv && \
+    /venv/bin/pip install --cache-dir=/pip-cache uv && \
+    /venv/bin/pip install --cache-dir=/pip-cache \
+      torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
+      --index-url https://download.pytorch.org/whl/cu126 --no-deps && \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation flash-attn==2.6.3 || true
+
+# Layer 2: llama-cpp-python
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    /venv/bin/pip install --cache-dir=/pip-cache \
+    https://github.com/JamePeng/llama-cpp-python/releases/download/v0.3.18-cu126-AVX2-linux-20251220/llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl
+
+ENV PATH="/venv/bin:${PATH}"
+ENV VIRTUAL_ENV="/venv"
+
+CMD ["bash"]
