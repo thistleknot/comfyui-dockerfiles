@@ -21,7 +21,7 @@ COPY requirements.txt .
 # Install Python dependencies with pip cache mount
 # Using BuildKit cache mount to persist pip cache between builds
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt
 
 # Clone ComfyUI repository
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
@@ -29,7 +29,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
 # Copy ComfyUI requirements and install
 WORKDIR /app/ComfyUI
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt
 
 # Copy any additional files or custom nodes
 # This should be done last as these change most frequently
@@ -39,4 +39,4 @@ COPY . /app/custom
 EXPOSE 8188
 
 # Set the default command
-CMD ["python", "main.py", "--listen", "0.0.0.0"]
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

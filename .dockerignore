@@ -29,8 +29,8 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Documentation (if not needed in image)
-*.md
+# Documentation (specific files that aren't needed in image)
+OPTIMIZATION_EXAMPLES.md
 docs/
 
 # Tests
