@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 
 VENV_DIR="${HOME}/comfyui-venv"
@@ -8,9 +9,24 @@ CUSTOM_NODES_IMAGE="custom-nodes-ready:cu126-pt26"
 FINAL_IMAGE="sd-worker:latest"
 
 echo "=== Setting up build environment ==="
-
 mkdir -p "${VENV_DIR}"
 
+# Run compatibility analysis
+echo ""
+echo "=== Running Compatibility Analysis ==="
+./find_compatible_builds.sh custom_nodes custom_node_repos.txt
+
+echo ""
+echo "=== Build Configuration ==="
+cat build_configs/SPLIT_REPORT.txt
+echo ""
+echo "Press Enter to continue or Ctrl+C to abort..."
+read
+
+# Copy unified list for Dockerfile.custom_nodes
+cp build_configs/set-unified.txt custom_node_repos_build.txt
+
+echo ""
 echo "=== Building ComfyUI Images (3-Stage) ==="
 
 # Stage 1: Base ML environment (PyTorch + llama-cpp + UV)
@@ -38,6 +54,9 @@ docker run --rm \
   --entrypoint bash \
   "${FINAL_IMAGE}" \
   -c "cp -a /venv/. /host-venv/"
+
+# Cleanup
+rm -f custom_node_repos_build.txt
 
 echo ""
 echo "=== Build Complete ==="

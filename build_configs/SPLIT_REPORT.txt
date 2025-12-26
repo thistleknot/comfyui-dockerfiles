@@ -1,0 +1,36 @@
+=== Node Split Analysis ===
+Generated: Fri Dec 26 10:51:20 AM PST 2025
+
+CONFLICTING NODES (0)
+---------------------------------
+
+
+BUILD OPTIONS
+-------------
+
+OPTION 1: Unified Build (Recommended - Single Image)
+  File: set-unified.txt
+  Nodes: 0 (all nodes)
+  ComfyUI: latest
+  Manager: latest
+  Strategy: Latest ComfyUI packages override conflicting node requirements
+  ⚠ 0 conflicting nodes will use ComfyUI's package versions
+  ⚠ These nodes may not function correctly
+
+
+OPTION 2: Split Builds (Not Available)
+  ✗ No compatible ComfyUI version found for set-off nodes
+  Only Option 1 (Unified) or Option 3 (Exclude) are viable
+
+OPTION 3: Latest Only (Exclude Incompatible Nodes)
+  File: set-base.txt
+  Nodes: 0
+  ComfyUI: latest
+  Manager: latest
+  Strategy: Exclude 0 problematic nodes entirely
+
+RECOMMENDATION
+--------------
+Use Option 1 (Unified Build) - no compatible ComfyUI version exists.
+Test if 0 conflicting nodes work with package overrides.
+If critical functionality breaks, use Option 3 to exclude them.

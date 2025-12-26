@@ -1,0 +1,1 @@
+# Set-Base: Compatible with latest ComfyUI + Manager
