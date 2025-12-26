@@ -1,0 +1,58 @@
+# ComfyUI Dockerfile with advanced pip caching, layering, and multi-stage builds
+# syntax=docker/dockerfile:1.4
+
+# Stage 1: Base image with system dependencies
+FROM python:3.11-slim as base
+
+# Install system dependencies in a single layer
+RUN apt-get update && apt-get install -y \
+    git \
+    wget \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Stage 2: Builder stage for pip installations
+FROM base as builder
+
+WORKDIR /app
+
+# Copy requirements files first (better layer caching)
+COPY requirements.txt /app/requirements.txt
+
+# Install Python dependencies with persistent pip cache
+# The cache mount persists between builds, significantly speeding up rebuilds
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip && \
+    pip install --user --no-warn-script-location -r requirements.txt
+
+# Clone ComfyUI and install its dependencies
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /app/ComfyUI
+
+WORKDIR /app/ComfyUI
+
+# Install ComfyUI requirements with cache mount
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --user --no-warn-script-location -r requirements.txt
+
+# Stage 3: Final runtime image (smaller, only runtime dependencies)
+FROM base as runtime
+
+WORKDIR /app/ComfyUI
+
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /root/.local
+COPY --from=builder /app/ComfyUI /app/ComfyUI
+
+# Ensure scripts in .local are in PATH
+ENV PATH=/root/.local/bin:$PATH
+
+# Copy custom nodes or additional files (done last for optimal caching)
+COPY --chown=root:root . /app/custom
+
+# Expose ComfyUI port
+EXPOSE 8188
+
+# Run ComfyUI
+CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188"]

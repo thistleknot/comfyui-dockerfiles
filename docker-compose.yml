@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Enable BuildKit for cache mounts
+      # Set DOCKER_BUILDKIT=1 or use docker compose build
+    ports:
+      - "8188:8188"
+    volumes:
+      # Mount models directory for persistent storage
+      - ./models:/app/ComfyUI/models
+      # Mount output directory
+      - ./output:/app/ComfyUI/output
+      # Mount input directory
+      - ./input:/app/ComfyUI/input
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  comfyui-multistage:
+    build:
+      context: .
+      dockerfile: Dockerfile.multistage
+    ports:
+      - "8189:8188"
+    volumes:
+      - ./models:/app/ComfyUI/models
+      - ./output:/app/ComfyUI/output
+      - ./input:/app/ComfyUI/input
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
