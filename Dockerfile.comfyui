@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     if [ -s /tmp/extra_packages.txt ]; then \
         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt; \
     fi && \
-    /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/all_requirements.txt
+    /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/all_requirements.txt
 
 # Layer 3: Setup structure and copy staged custom nodes
 RUN cd ComfyUI && \

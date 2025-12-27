@@ -54,6 +54,8 @@ langchain-openai
 yapf
 pymeshlab
 markdownify
+git+https://github.com/NVlabs/nvdiffrast.git
 
 # Fix numpy conflict - Inspire Pack needs <2.0
 # numpy<2.0
+

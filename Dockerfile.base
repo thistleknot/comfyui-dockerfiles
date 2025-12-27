@@ -2,6 +2,8 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
 # Set CUDA architecture for Quadro P5200 (compute 5.0)
 ENV TORCH_CUDA_ARCH_LIST="5.0"
+ENV CUDA_ARCHITECTURES="50"
+ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Layer 0: System packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,25 +13,41 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg libsm6 libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
-# Layer 1: PyTorch 2.6.0 + flash-attn + UV
+# Layer 1: PyTorch 2.6.0 + UV
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     python3.12 -m venv /venv && \
     /venv/bin/pip install --cache-dir=/pip-cache uv && \
     /venv/bin/pip install --cache-dir=/pip-cache \
       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
-      --index-url https://download.pytorch.org/whl/cu126 --no-deps && \
-    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation flash-attn==2.6.3 || \
-    echo "⚠ flash-attn install failed (expected on compute 5.0)" | tee /build_warnings.txt
+      --index-url https://download.pytorch.org/whl/cu126 --no-deps
 
-# Layer 2: llama-cpp-python
+# Layer 2: Build llama.cpp from source (compute 5.0 + AVX2)
+RUN cd /tmp && \
+    git clone https://github.com/ggml-org/llama.cpp && \
+    cd llama.cpp && \
+    cmake -B build \
+      -DGGML_CUDA=ON \
+      -DCMAKE_CUDA_ARCHITECTURES=50 \
+      -DGGML_AVX2=ON \
+      -DLLAMA_CURL=OFF && \
+    cmake --build build --config Release -j$(nproc) && \
+    cp build/bin/* /usr/local/bin/ 2>/dev/null || true && \
+    cp build/lib/*.so /usr/local/lib/ 2>/dev/null || true && \
+    ldconfig && \
+    cd / && rm -rf /tmp/llama.cpp
+
+# Layer 3: llama-cpp-python wheel
 COPY llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl /tmp/
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --cache-dir=/pip-cache \
     /tmp/llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl && \
     rm /tmp/llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl
 
+# Layer 4: Flash-attn (optional, will fail on compute 5.0)
+RUN /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
+    echo "⚠ flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt
+
 ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
-ENV TORCH_CUDA_ARCH_LIST="5.0"
 
 CMD ["bash"]
