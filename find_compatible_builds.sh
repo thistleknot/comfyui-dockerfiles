@@ -291,17 +291,17 @@ find_compatible_comfyui_release() {
                     echo "$ref|WITHOUT_MANAGER" > "$OUTPUT_DIR/COMPATIBLE_COMFYUI_VERSION.txt"
                 fi
                 
-                cd - > /dev/null
+                cd - > /dev/null 2>&1
                 return 0
             fi
         fi
     done
     
-    cd - > /dev/null
+    cd - > /dev/null 2>&1
     echo "  ✗ No compatible version found in last $MAX_RELEASES releases"
     echo "  → Will use unified build with package override"
     echo "NONE|OVERRIDE" > "$OUTPUT_DIR/COMPATIBLE_COMFYUI_VERSION.txt"
-    return 1
+    return 0
 }
 
 # Categorize nodes

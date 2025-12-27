@@ -1,0 +1,6 @@
+FROM python:3.12-slim
+
+RUN --mount=type=cache,target=/pip-cache,sharing=locked \
+    pip install --cache-dir=/pip-cache pandas streamlit
+
+CMD ["python", "-c", "import pandas, streamlit; print('ok')"]

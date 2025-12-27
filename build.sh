@@ -1,71 +1,150 @@
 #!/bin/bash
 set -e
 
-VENV_DIR="${HOME}/comfyui-venv"
-
 # Image names
 ML_BASE_IMAGE="ml-base:cu126-pt26"
 CUSTOM_NODES_IMAGE="custom-nodes-ready:cu126-pt26"
 FINAL_IMAGE="sd-worker:latest"
 
-echo "=== Setting up build environment ==="
-mkdir -p "${VENV_DIR}"
+# Parse arguments
+FORCE_BASE=false
+FORCE_NODES=false
+FORCE_ALL=false
 
-# Run compatibility analysis
-echo ""
-echo "=== Running Compatibility Analysis ==="
-./find_compatible_builds.sh custom_nodes custom_node_repos.txt
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --force-base) FORCE_BASE=true; shift ;;
+    --force-nodes) FORCE_NODES=true; shift ;;
+    --force-all) FORCE_ALL=true; shift ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
 
-echo ""
-echo "=== Build Configuration ==="
-cat build_configs/SPLIT_REPORT.txt
-echo ""
-echo "Press Enter to continue or Ctrl+C to abort..."
-read
+if [ "$FORCE_ALL" = true ]; then
+  FORCE_BASE=true
+  FORCE_NODES=true
+fi
 
-# Copy unified list for Dockerfile.custom_nodes
-cp build_configs/set-unified.txt custom_node_repos_build.txt
+# Check if file is newer than image
+file_newer_than_image() {
+  local file=$1
+  local image=$2
+  
+  if ! docker image inspect "$image" >/dev/null 2>&1; then
+    return 0
+  fi
+  
+  local image_created=$(docker image inspect "$image" --format='{{.Created}}')
+  local image_timestamp=$(date -d "$image_created" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "$image_created" +%s 2>/dev/null)
+  local file_timestamp=$(stat -c %Y "$file" 2>/dev/null || stat -f %m "$file" 2>/dev/null)
+  
+  if [ "$file_timestamp" -gt "$image_timestamp" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# Run compatibility analysis only if repo list changed
+RUN_ANALYSIS=false
+if [ ! -f "custom_node_repos_build.txt" ]; then
+  echo "=== Running Compatibility Analysis (build list missing) ==="
+  RUN_ANALYSIS=true
+elif [ "custom_node_repos.txt" -nt "custom_node_repos_build.txt" ]; then
+  echo "=== Running Compatibility Analysis (repo list changed) ==="
+  RUN_ANALYSIS=true
+else
+  echo "=== Skipping Compatibility Analysis (repo list unchanged) ==="
+fi
+
+if [ "$RUN_ANALYSIS" = true ]; then
+  ./find_compatible_builds.sh custom_nodes custom_node_repos.txt || { echo "Analysis failed"; exit 1; }
+  cp build_configs/set-unified.txt custom_node_repos_build.txt
+fi
 
 echo ""
 echo "=== Building ComfyUI Images (3-Stage) ==="
 
-# Stage 1: Base ML environment (PyTorch + llama-cpp + UV)
-echo "[1/4] Building base ML image..."
-DOCKER_BUILDKIT=1 docker build \
-  -f Dockerfile.base \
-  -t "${ML_BASE_IMAGE}" .
+# Stage 1: Base ML environment
+REBUILD_BASE=false
+if [ "$FORCE_BASE" = true ]; then
+  echo "[1/3] Rebuilding base (--force-base)"
+  REBUILD_BASE=true
+elif ! docker image inspect "${ML_BASE_IMAGE}" >/dev/null 2>&1; then
+  echo "[1/3] Building base (image missing)"
+  REBUILD_BASE=true
+elif file_newer_than_image "Dockerfile.base" "${ML_BASE_IMAGE}"; then
+  echo "[1/3] Rebuilding base (Dockerfile.base changed)"
+  REBUILD_BASE=true
+elif [ -f "llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl" ] && \
+     file_newer_than_image "llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl" "${ML_BASE_IMAGE}"; then
+  echo "[1/3] Rebuilding base (llama wheel changed)"
+  REBUILD_BASE=true
+else
+  echo "[1/3] Skipping base (unchanged since $(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+fi
 
-# Stage 2: Custom nodes (CACHED unless custom_nodes/ changes)
-echo "[2/4] Building custom nodes layer..."
-DOCKER_BUILDKIT=1 docker build \
-  -f Dockerfile.custom_nodes \
-  -t "${CUSTOM_NODES_IMAGE}" .
+if [ "$REBUILD_BASE" = true ]; then
+  DOCKER_BUILDKIT=1 docker build -f Dockerfile.base -t "${ML_BASE_IMAGE}" .
+fi
 
-# Stage 3: ComfyUI latest (ALWAYS REBUILDS for fresh ComfyUI)
-echo "[3/4] Building ComfyUI latest (final image)..."
-DOCKER_BUILDKIT=1 docker build \
-  -f Dockerfile.comfyui \
-  -t "${FINAL_IMAGE}" .
+# Stage 2: Custom nodes
+REBUILD_NODES=false
+if [ "$FORCE_NODES" = true ]; then
+  echo "[2/3] Rebuilding custom nodes (--force-nodes)"
+  REBUILD_NODES=true
+elif ! docker image inspect "${CUSTOM_NODES_IMAGE}" >/dev/null 2>&1; then
+  echo "[2/3] Building custom nodes (image missing)"
+  REBUILD_NODES=true
+elif [ "$REBUILD_BASE" = true ]; then
+  echo "[2/3] Rebuilding custom nodes (base layer changed)"
+  REBUILD_NODES=true
+elif file_newer_than_image "Dockerfile.custom_nodes" "${CUSTOM_NODES_IMAGE}"; then
+  echo "[2/3] Rebuilding custom nodes (Dockerfile.custom_nodes changed)"
+  REBUILD_NODES=true
+elif file_newer_than_image "custom_node_repos_build.txt" "${CUSTOM_NODES_IMAGE}"; then
+  echo "[2/3] Rebuilding custom nodes (repo list changed)"
+  REBUILD_NODES=true
+else
+  echo "[2/3] Skipping custom nodes (unchanged since $(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+fi
 
-# Stage 4: Populate venv (use bash not python to avoid CUDA init)
-echo "[4/4] Copying venv to ${VENV_DIR}..."
-docker run --rm \
-  -v "${VENV_DIR}:/host-venv" \
-  --entrypoint bash \
-  "${FINAL_IMAGE}" \
-  -c "cp -a /venv/. /host-venv/"
+if [ "$REBUILD_NODES" = true ]; then
+  DOCKER_BUILDKIT=1 docker build -f Dockerfile.custom_nodes -t "${CUSTOM_NODES_IMAGE}" .
+fi
 
-# Cleanup
+# Stage 3: ComfyUI
+echo "[3/3] Checking ComfyUI layer..."
+REBUILD_COMFY=false
+
+if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
+  echo "  → Building (image missing)"
+  REBUILD_COMFY=true
+elif [ "$REBUILD_NODES" = true ]; then
+  echo "  → Rebuilding (custom nodes changed)"
+  REBUILD_COMFY=true
+elif file_newer_than_image "Dockerfile.comfyui" "${FINAL_IMAGE}"; then
+  echo "  → Rebuilding (Dockerfile.comfyui changed)"
+  REBUILD_COMFY=true
+elif file_newer_than_image "extra_packages.txt" "${FINAL_IMAGE}"; then
+  echo "  → Rebuilding (extra_packages.txt changed)"
+  REBUILD_COMFY=true
+else
+  echo "  → Rebuilding anyway (always fresh)"
+  REBUILD_COMFY=true
+fi
+
+if [ "$REBUILD_COMFY" = true ]; then
+  DOCKER_BUILDKIT=1 docker build \
+    -f Dockerfile.comfyui \
+    --build-arg BASE_IMAGE="${CUSTOM_NODES_IMAGE}" \
+    -t "${FINAL_IMAGE}" .
+fi
+
 rm -f custom_node_repos_build.txt
 
 echo ""
 echo "=== Build Complete ==="
 echo "Images:"
-echo "  1. ${ML_BASE_IMAGE} (base + PyTorch + llama-cpp)"
-echo "  2. ${CUSTOM_NODES_IMAGE} (+ custom nodes CACHED)"
-echo "  3. ${FINAL_IMAGE} (+ ComfyUI latest ALWAYS FRESH)"
-echo ""
-echo "Venv: ${VENV_DIR}"
-echo ""
-echo "Run:"
-echo "docker run -it --rm --gpus all -p 8188:8188 -v ${VENV_DIR}:/venv ${FINAL_IMAGE}"
+echo "  1. ${ML_BASE_IMAGE} ($(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+echo "  2. ${CUSTOM_NODES_IMAGE} ($(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+echo "  3. ${FINAL_IMAGE} ($(docker image inspect ${FINAL_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"

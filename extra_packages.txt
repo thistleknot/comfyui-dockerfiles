@@ -1,5 +1,4 @@
 # Manual package fixes for nodes with incomplete requirements.txt
-# Add packages here when you see import errors in logs
 
 # OpenCV (required by many nodes)
 opencv-python
@@ -15,3 +14,46 @@ compel
 
 # Fix huggingface_hub compatibility
 diffusers>=0.30.0
+
+# Missing packages from ComfyUI custom nodes
+piexif
+pydub
+imagesize
+ninja
+scikit-image
+ultralytics
+voluptuous
+sounddevice
+py-cpuinfo
+dill
+pynvml
+segment_anything
+git+https://github.com/facebookresearch/sam2
+imgutils
+google-generativeai
+google.genai
+insightface
+ftfy
+trimesh
+numexpr
+blend-modes
+qwen-vl-utils
+evalidate
+dynamicprompts
+aisuite
+timm
+numba>=0.59.0
+imageio-ffmpeg
+sageattention
+anthropic
+langchain-community
+addict
+# tensor-img-utils
+google-genai
+langchain-openai
+yapf
+pymeshlab
+markdownify
+
+# Fix numpy conflict - Inspire Pack needs <2.0
+# numpy<2.0

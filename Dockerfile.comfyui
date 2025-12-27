@@ -1,53 +1,35 @@
-ARG BASE_IMAGE=custom-nodes-base:cu126-pt26
+ARG BASE_IMAGE=custom-nodes-ready:cu126-pt26
 FROM ${BASE_IMAGE}
 
 ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
-
-ENV CORE_REPOS="comfyanonymous/ComfyUI ltdrdata/ComfyUI-Manager"
+ENV PYTHONWARNINGS="ignore::SyntaxWarning"
 
 WORKDIR /default-comfyui-bundle
 
 # Layer 1: Clone ComfyUI + Manager
-RUN --mount=type=cache,target=/mnt/external/pip-cache,id=pip-external \
-    for repo in $CORE_REPOS; do \
-        git clone https://github.com/${repo}.git; \
-    done
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
+    git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
-# Layer 2: Install ComfyUI requirements
-RUN --mount=type=cache,target=/mnt/external/pip-cache,id=pip-external \
-    cd ComfyUI && \
-    /venv/bin/uv pip install --cache-dir=/pip-cache -r requirements.txt
-
-# Layer 3: Install Manager requirements
-RUN --mount=type=cache,target=/mnt/external/pip-cache,id=pip-external \
-    cd ComfyUI && \
-    if [ -f ../ComfyUI-Manager/requirements.txt ]; then \
-        /venv/bin/uv pip install --cache-dir=/pip-cache -r ../ComfyUI-Manager/requirements.txt || \
-        (while IFS= read -r pkg; do \
-             /venv/bin/uv pip install "$pkg" || \
-             /venv/bin/uv pip install "${pkg%%[>=<~!]*}"; \
-         done < ../ComfyUI-Manager/requirements.txt); \
-    fi
-
-# Layer 4: Extra packages (manual fixes for incomplete requirements)
+# Layer 2: Install ALL requirements in single pass
 COPY extra_packages.txt /tmp/extra_packages.txt
-RUN --mount=type=cache,target=/mnt/external/pip-cache,id=pip-external \
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    cat ComfyUI/requirements.txt > /tmp/all_requirements.txt && \
+    if [ -f ComfyUI-Manager/requirements.txt ]; then \
+        cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt; \
+    fi && \
     if [ -s /tmp/extra_packages.txt ]; then \
-        echo "=== Installing Extra Packages ===" && \
-        grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' | while IFS= read -r pkg; do \
-            echo "Installing: $pkg" && \
-            /venv/bin/uv pip install --cache-dir=/pip-cache "$pkg" || echo "Failed: $pkg"; \
-        done; \
-    fi
+        grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt; \
+    fi && \
+    /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/all_requirements.txt
 
-# Layer 5: Setup ComfyUI structure and copy custom nodes
+# Layer 3: Setup structure and copy staged custom nodes
 RUN cd ComfyUI && \
     mkdir -p \
         models/checkpoints models/vae models/loras models/embeddings \
         models/controlnet models/clip models/unet models/upscale_models \
-        input output temp custom_nodes && \
+        input output temp custom_nodes user/default && \
     mv ../ComfyUI-Manager custom_nodes/ && \
     if [ -d /custom_nodes_staged ] && [ "$(ls -A /custom_nodes_staged 2>/dev/null)" ]; then \
         cp -r /custom_nodes_staged/* custom_nodes/; \
@@ -56,6 +38,50 @@ RUN cd ComfyUI && \
 
 WORKDIR /default-comfyui-bundle/ComfyUI
 
+# Layer 4: Initialize ComfyUI once to generate configs and install Manager dependencies
+RUN python3 main.py  --listen --force-fp32 --lowvram > /tmp/comfyui_init.log 2>&1 & \
+    PID=$! && \
+    echo "Waiting for ComfyUI server to start..." && \
+    timeout 600 bash -c 'until grep -q "To see the GUI go to: http://0.0.0.0:8188" /tmp/comfyui_init.log; do sleep 2; done' && \
+    echo "Server started, waiting 30s for node initialization..." && \
+    sleep 30 && \
+    kill -TERM $PID 2>/dev/null || true && \
+    wait $PID 2>/dev/null || true && \
+    cat /tmp/comfyui_init.log
+
+# Layer 5: Update config to enable custom node installation
+RUN cat > /tmp/update_config.py << 'EOF'
+import json
+import os
+
+config_path = 'user/default/comfy.settings.json'
+
+if os.path.exists(config_path):
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+    except:
+        config = {}
+else:
+    config = {}
+
+# Enable custom node installation
+config['Comfy.NodeLibrary.Bookmarks.V2'] = []
+config['Comfy.UseNewMenu'] = 'Top'
+config['Comfy.NodeLibrary.EnableInstall'] = True
+
+with open(config_path, 'w') as f:
+    json.dump(config, f, indent=2)
+
+print('Config updated: custom node installation enabled')
+print(json.dumps(config, indent=2))
+EOF
+
+RUN python3 /tmp/update_config.py && rm /tmp/update_config.py
+
 ENTRYPOINT ["/bin/bash", "-c", "\
   source /venv/bin/activate && \
   python3 main.py --listen --lowvram --force-fp32"]
+  
+#docker run -it --rm --gpus all -p 8188:8188 -v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models sd-worker:latest
+
