@@ -55,7 +55,44 @@ yapf
 pymeshlab
 markdownify
 git+https://github.com/NVlabs/nvdiffrast.git
-
+bitsandbytes
+neo4j
+docx2txt
+openpyxl
+pdfplumber
+xlrd
+wikipedia
+attrdict
+browser-use
+beautifulsoup4
+fish-audio-sdk
+html2image
+json-repair
+llama-index-core
+llama-index-llms-openai
+mcp
+moviepy
+peft
+pygments
+qwen-vl-utils
+requests-toolbelt
+sqlalchemy
+discord.py
+feedparser
+ffmpeg-python
+easyocr
+mdtex2html
+nest-asyncio
+redis
+srt
+streamlit
+uvicorn
+arxiv
+charset-normalizer
+moviepy
+langchain-ollama
+librosa
+keyboard
 # Fix numpy conflict - Inspire Pack needs <2.0
 # numpy<2.0
 

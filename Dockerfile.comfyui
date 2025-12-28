@@ -15,6 +15,7 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
 # Layer 2: Install ALL requirements in single pass
 COPY extra_packages.txt /tmp/extra_packages.txt
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    /venv/bin/pip install --cache-dir=/pip-cache setuptools && \
     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt && \
     if [ -f ComfyUI-Manager/requirements.txt ]; then \
         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt; \
@@ -42,7 +43,7 @@ WORKDIR /default-comfyui-bundle/ComfyUI
 RUN python3 main.py  --listen --force-fp32 --lowvram > /tmp/comfyui_init.log 2>&1 & \
     PID=$! && \
     echo "Waiting for ComfyUI server to start..." && \
-    timeout 600 bash -c 'until grep -q "To see the GUI go to: http://0.0.0.0:8188" /tmp/comfyui_init.log; do sleep 2; done' && \
+    timeout 60 bash -c 'until grep -q "To see the GUI go to: http://0.0.0.0:8188" /tmp/comfyui_init.log; do sleep 2; done' && \
     echo "Server started, waiting 30s for node initialization..." && \
     sleep 30 && \
     kill -TERM $PID 2>/dev/null || true && \
