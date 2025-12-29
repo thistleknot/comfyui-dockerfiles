@@ -20,17 +20,18 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
       --index-url https://download.pytorch.org/whl/cu126 --no-deps
 
-# Layer 2: Build llama-cpp-python from source with CUDA
-RUN export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
+# Layer 2: Build llama-cpp-python from source with CUDA (with cache)
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
-    /venv/bin/pip install --no-cache-dir scikit-build-core setuptools && \
+    /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core setuptools && \
     git clone https://github.com/abetlen/llama-cpp-python /tmp/llama-cpp-python && \
     cd /tmp/llama-cpp-python && \
     git submodule update --init --recursive && \
     sed -i '27s/"native"/"50"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt && \
     CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/cuda/lib64/stubs" \
-    /venv/bin/pip install --no-cache-dir --no-build-isolation --force-reinstall . && \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall . && \
     cd / && rm -rf /tmp/llama-cpp-python
 
 # Layer 3: Verify build artifacts and library linkage
