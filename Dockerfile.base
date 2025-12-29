@@ -21,39 +21,42 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
       --index-url https://download.pytorch.org/whl/cu126 --no-deps
 
-# Layer 2: Build llama.cpp CLI from source (compute 5.0)
+# Layer 2: Build llama.cpp libraries only (skip examples)
 RUN cd /tmp && \
     git clone https://github.com/ggml-org/llama.cpp && \
     cd llama.cpp && \
+    sed -i '27s/"native"/"50"/' ggml/src/ggml-cuda/CMakeLists.txt && \
     cmake -B build \
       -DGGML_CUDA=ON \
       -DCMAKE_CUDA_ARCHITECTURES=50 \
+      -DGGML_NATIVE=OFF \
       -DGGML_AVX2=ON \
-      -DLLAMA_CURL=OFF && \
-    cmake --build build --config Release -j$(nproc) && \
-    cp build/bin/* /usr/local/bin/ 2>/dev/null || true && \
-    cp build/lib/*.so /usr/local/lib/ 2>/dev/null || true && \
-    ldconfig && \
-    cd / && rm -rf /tmp/llama.cpp
+      -DLLAMA_CURL=OFF \
+      -DBUILD_SHARED_LIBS=ON \
+      -DGGML_BUILD_EXAMPLES=OFF \
+      -DGGML_BUILD_TESTS=OFF && \
+    cmake --build build --config Release --target ggml-cuda ggml llama -j$(nproc) && \
+    mkdir -p /usr/local/lib/llama && \
+    cp build/bin/*.so* /usr/local/lib/llama/ && \
+    ldconfig
 
-# Layer 3: Build llama-cpp-python from source (compute 5.0) with CUDA stubs
+# Layer 3: Build llama-cpp-python from source with proper CUDA support
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
-    export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
-    export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
-    export LDFLAGS="-L$CUDA_STUBS_DIR -lcuda" && \
-    /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core && \
-    cd /tmp && \
-    git clone https://github.com/abetlen/llama-cpp-python && \
-    cd llama-cpp-python && \
-    git submodule update --init --recursive && \
-    CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=\"-L$CUDA_STUBS_DIR -lcuda\" -DCMAKE_SHARED_LINKER_FLAGS=\"-L$CUDA_STUBS_DIR -lcuda\"" \
-    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation . && \
+    /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core setuptools && \
+    git clone --recursive https://github.com/abetlen/llama-cpp-python /tmp/llama-cpp-python && \
+    cd /tmp/llama-cpp-python && \
+    sed -i '27s/"native"/"50"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt && \
+    CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_NATIVE=OFF -DGGML_AVX2=ON" \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall . && \
     cd / && rm -rf /tmp/llama-cpp-python
 
-# Layer 4: Verify llama-cpp-python installed (package check only)
-RUN /venv/bin/pip show llama-cpp-python || \
-    (echo "✗ llama-cpp-python not installed" && exit 1) && \
-    echo "✓ llama-cpp-python installed successfully"
+# Layer 4: Verify llama-cpp-python version (must be >= 0.3.17)
+RUN /venv/bin/pip install --cache-dir=/pip-cache packaging && \
+    VERSION=$(/venv/bin/pip show llama-cpp-python | grep Version | awk '{print $2}') && \
+    echo "llama-cpp-python version: $VERSION" && \
+    /venv/bin/python3 -c "from packaging import version; import sys; v='$VERSION'; sys.exit(0 if version.parse(v) >= version.parse('0.3.17') else 1)" && \
+    echo "✓ llama-cpp-python >= 0.3.17 installed successfully" || \
+    (echo "✗ llama-cpp-python version too old (need >= 0.3.17)" && exit 1)
 
 # Layer 5: Flash-attn (optional, will fail on compute 5.0)
 RUN /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
