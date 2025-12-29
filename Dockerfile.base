@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
       --index-url https://download.pytorch.org/whl/cu126 --no-deps
 
-# Layer 2: Build llama.cpp from source (compute 5.0 + AVX2)
+# Layer 2: Build llama.cpp CLI from source (compute 5.0)
 RUN cd /tmp && \
     git clone https://github.com/ggml-org/llama.cpp && \
     cd llama.cpp && \
@@ -36,14 +36,26 @@ RUN cd /tmp && \
     ldconfig && \
     cd / && rm -rf /tmp/llama.cpp
 
-# Layer 3: llama-cpp-python wheel
-COPY llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl /tmp/
+# Layer 3: Build llama-cpp-python from source (compute 5.0) with CUDA stubs
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
-    /venv/bin/pip install --cache-dir=/pip-cache \
-    /tmp/llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl && \
-    rm /tmp/llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl
+    export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
+    export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
+    export LDFLAGS="-L$CUDA_STUBS_DIR -lcuda" && \
+    /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core && \
+    cd /tmp && \
+    git clone https://github.com/abetlen/llama-cpp-python && \
+    cd llama-cpp-python && \
+    git submodule update --init --recursive && \
+    CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=\"-L$CUDA_STUBS_DIR -lcuda\" -DCMAKE_SHARED_LINKER_FLAGS=\"-L$CUDA_STUBS_DIR -lcuda\"" \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation . && \
+    cd / && rm -rf /tmp/llama-cpp-python
 
-# Layer 4: Flash-attn (optional, will fail on compute 5.0)
+# Layer 4: Verify llama-cpp-python installed (package check only)
+RUN /venv/bin/pip show llama-cpp-python || \
+    (echo "✗ llama-cpp-python not installed" && exit 1) && \
+    echo "✓ llama-cpp-python installed successfully"
+
+# Layer 5: Flash-attn (optional, will fail on compute 5.0)
 RUN /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
     echo "⚠ flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt
 
