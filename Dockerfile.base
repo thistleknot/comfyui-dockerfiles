@@ -75,6 +75,12 @@ RUN echo "=== Checking installed files ===" && \
 RUN /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
     echo "⚠ flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt
 
+# Layer 5: Fix diffusers compatibility (solves the original import error)
+RUN /venv/bin/pip install --upgrade diffusers
+
+# Add llama library path - THIS IS THE FIX YOU WANTED
+ENV LD_LIBRARY_PATH="/venv/lib/python3.12/site-packages/llama_cpp/lib:/usr/lib:/usr/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+
 ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 
