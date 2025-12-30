@@ -12,10 +12,10 @@ WORKDIR /default-comfyui-bundle
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
-# Layer 2: Install ALL requirements in single pass
+# Layer 2: Install ALL requirements (excluding nvdiffrast)
 COPY extra_packages.txt /tmp/extra_packages.txt
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
-    /venv/bin/pip install --cache-dir=/pip-cache setuptools && \
+    /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython && \
     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt && \
     if [ -f ComfyUI-Manager/requirements.txt ]; then \
         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt; \
@@ -23,7 +23,13 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     if [ -s /tmp/extra_packages.txt ]; then \
         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt; \
     fi && \
-    /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/all_requirements.txt
+    grep -v 'nvdiffrast' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt && \
+    /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+
+# Layer 2b: Install nvdiffrast separately with proper PyTorch visibility
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation \
+    git+https://github.com/NVlabs/nvdiffrast.git
 
 # Layer 3: Setup structure and copy staged custom nodes
 RUN cd ComfyUI && \
@@ -85,4 +91,3 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   python3 main.py --listen --lowvram --force-fp32"]
   
 #docker run -it --rm --gpus all -p 8188:8188 -v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models sd-worker:latest
-
