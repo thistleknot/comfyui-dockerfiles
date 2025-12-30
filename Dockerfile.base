@@ -20,18 +20,39 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 \
       --index-url https://download.pytorch.org/whl/cu126 --no-deps
 
-# Layer 2: Build llama-cpp-python from source with CUDA (with cache)
+# Layer 2: Build llama-cpp-python from source with CUDA (DON'T delete yet)
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
     ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
     /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core setuptools && \
-    git clone https://github.com/abetlen/llama-cpp-python /tmp/llama-cpp-python && \
+    git clone https://github.com/JamePeng/llama-cpp-python /tmp/llama-cpp-python && \
     cd /tmp/llama-cpp-python && \
     git submodule update --init --recursive && \
     sed -i '27s/"native"/"50"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt && \
     CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/cuda/lib64/stubs" \
-    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall . && \
+    /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall .
+
+# Layer 2b: Install conversion requirements
+RUN git clone https://github.com/ggerganov/llama.cpp /tmp/llama.cpp-main && \
+    /venv/bin/pip install -r /tmp/llama.cpp-main/requirements/requirements-convert_hf_to_gguf.txt && \
+    rm -rf /tmp/llama.cpp-main && \
+    cd /tmp/llama-cpp-python/vendor/llama.cpp && \
+    find requirements -name "*.txt" -exec /venv/bin/pip install -r {} \; 2>/dev/null || true
+
+# Layer 2c: Build llama-quantize from vendor llama.cpp
+RUN cd /tmp/llama-cpp-python/vendor/llama.cpp && \
+    export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" && \
+    export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
+    cmake -B build \
+      -DGGML_CUDA=ON \
+      -DCMAKE_CUDA_ARCHITECTURES=50 \
+      -DGGML_NATIVE=OFF \
+      -DLLAMA_CURL=OFF \
+      -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/cuda/lib64/stubs" && \
+    cmake --build build --config Release --target llama-quantize -j$(nproc) && \
+    mkdir -p bin && cp build/bin/llama-quantize bin/ && \
+    mv /tmp/llama-cpp-python/vendor/llama.cpp /opt/llama.cpp && \
     cd / && rm -rf /tmp/llama-cpp-python
 
 # Layer 3: Verify build artifacts and library linkage
