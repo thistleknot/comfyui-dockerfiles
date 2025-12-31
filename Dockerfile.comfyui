@@ -45,16 +45,12 @@ RUN cd ComfyUI && \
 
 WORKDIR /default-comfyui-bundle/ComfyUI
 
-# Layer 4: Initialize ComfyUI once to generate configs and install Manager dependencies
-RUN python3 main.py  --listen --force-fp32 --lowvram > /tmp/comfyui_init.log 2>&1 & \
-    PID=$! && \
-    echo "Waiting for ComfyUI server to start..." && \
-    timeout 60 bash -c 'until grep -q "To see the GUI go to: http://0.0.0.0:8188" /tmp/comfyui_init.log; do sleep 2; done' && \
-    echo "Server started, waiting 30s for node initialization..." && \
-    sleep 30 && \
-    kill -TERM $PID 2>/dev/null || true && \
-    wait $PID 2>/dev/null || true && \
-    cat /tmp/comfyui_init.log
+# Layer 4: Copy local depth-anything model
+# COPY ./custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
+RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
+
+# Layer 4: Initialize ComfyUI (download models, setup nodes) without running server
+RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 360; kill $! 2>/dev/null || true
 
 # Layer 5: Update config to enable custom node installation
 RUN cat > /tmp/update_config.py << 'EOF'
@@ -88,6 +84,6 @@ RUN python3 /tmp/update_config.py && rm /tmp/update_config.py
 
 ENTRYPOINT ["/bin/bash", "-c", "\
   source /venv/bin/activate && \
-  python3 main.py --listen --lowvram --force-fp32"]
+  python3 main.py --listen --lowvram --force-fp16"]
   
 #docker run -it --rm --gpus all -p 8188:8188 -v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models sd-worker:latest

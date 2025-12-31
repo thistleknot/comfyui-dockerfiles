@@ -116,6 +116,12 @@ fi
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
 
+#ln -f -s /mnt/external/models/depth-anything/depth_anything_v2_vitl.pth custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
+
+#mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
+
+#cp -f /mnt/external/models/depth-anything/depth_anything_v2_vitl.pth custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
+
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
   echo "  → Building (image missing)"
   REBUILD_COMFY=true
@@ -148,3 +154,5 @@ echo "Images:"
 echo "  1. ${ML_BASE_IMAGE} ($(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  2. ${CUSTOM_NODES_IMAGE} ($(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  3. ${FINAL_IMAGE} ($(docker image inspect ${FINAL_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+
+#rm -f custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
