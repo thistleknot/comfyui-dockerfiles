@@ -108,15 +108,17 @@ else
   echo "[2/3] Skipping custom nodes (unchanged since $(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 fi
 
-if [ "$REBUILD_NODES" = true ]; then
-  DOCKER_BUILDKIT=1 docker build -f Dockerfile.custom_nodes -t "${CUSTOM_NODES_IMAGE}" .
+NO_CACHE=""
+if file_newer_than_image "Dockerfile.custom_nodes" "${CUSTOM_NODES_IMAGE}" || \
+   file_newer_than_image "custom_node_repos_build.txt" "${CUSTOM_NODES_IMAGE}"; then
+  NO_CACHE="--no-cache"
 fi
-
+if [ "$REBUILD_NODES" = true ]; then
+  DOCKER_BUILDKIT=1 docker build ${NO_CACHE} -f Dockerfile.custom_nodes -t "${CUSTOM_NODES_IMAGE}" .
+fi
 # Stage 3: ComfyUI
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
-
-mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
 
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
   echo "  → Building (image missing)"
@@ -142,13 +144,9 @@ if [ "$REBUILD_COMFY" = true ]; then
     -t "${FINAL_IMAGE}" .
 fi
 
-rm -f custom_node_repos_build.txt
-
 echo ""
 echo "=== Build Complete ==="
 echo "Images:"
 echo "  1. ${ML_BASE_IMAGE} ($(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  2. ${CUSTOM_NODES_IMAGE} ($(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  3. ${FINAL_IMAGE} ($(docker image inspect ${FINAL_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
-
-#rm -f custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
