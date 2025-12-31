@@ -86,4 +86,7 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   source /venv/bin/activate && \
   python3 main.py --listen --lowvram --force-fp16"]
   
-#docker run -it --rm --gpus all -p 8188:8188 -v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models sd-worker:latest
+#docker run -it --rm --gpus all -p 8188:8188 \
+  #-v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models \
+  #-v /mnt/external/models/depth-anything/Depth-Anything-V2-Large:/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large \
+  #sd-worker:latest

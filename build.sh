@@ -116,11 +116,7 @@ fi
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
 
-#ln -f -s /mnt/external/models/depth-anything/depth_anything_v2_vitl.pth custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
-
-#mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
-
-#cp -f /mnt/external/models/depth-anything/depth_anything_v2_vitl.pth custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
+mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
 
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
   echo "  → Building (image missing)"
