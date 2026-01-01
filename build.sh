@@ -46,10 +46,10 @@ file_newer_than_image() {
 
 # Run compatibility analysis only if repo list changed
 RUN_ANALYSIS=false
-if [ ! -f "custom_node_repos_build.txt" ]; then
+if [ ! -f "custom_node_repos.txt" ]; then
   echo "=== Running Compatibility Analysis (build list missing) ==="
   RUN_ANALYSIS=true
-elif [ "custom_node_repos.txt" -nt "custom_node_repos_build.txt" ]; then
+elif [ "custom_node_repos.txt" -nt "custom_node_repos.txt" ]; then
   echo "=== Running Compatibility Analysis (repo list changed) ==="
   RUN_ANALYSIS=true
 else
@@ -58,7 +58,7 @@ fi
 
 if [ "$RUN_ANALYSIS" = true ]; then
   ./find_compatible_builds.sh custom_nodes custom_node_repos.txt || { echo "Analysis failed"; exit 1; }
-  cp build_configs/set-unified.txt custom_node_repos_build.txt
+  cp build_configs/set-unified.txt custom_node_repos.txt
 fi
 
 echo ""
@@ -101,21 +101,13 @@ elif [ "$REBUILD_BASE" = true ]; then
 elif file_newer_than_image "Dockerfile.custom_nodes" "${CUSTOM_NODES_IMAGE}"; then
   echo "[2/3] Rebuilding custom nodes (Dockerfile.custom_nodes changed)"
   REBUILD_NODES=true
-elif file_newer_than_image "custom_node_repos_build.txt" "${CUSTOM_NODES_IMAGE}"; then
+elif file_newer_than_image "custom_node_repos.txt" "${CUSTOM_NODES_IMAGE}"; then
   echo "[2/3] Rebuilding custom nodes (repo list changed)"
   REBUILD_NODES=true
 else
   echo "[2/3] Skipping custom nodes (unchanged since $(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 fi
 
-NO_CACHE=""
-if file_newer_than_image "Dockerfile.custom_nodes" "${CUSTOM_NODES_IMAGE}" || \
-   file_newer_than_image "custom_node_repos_build.txt" "${CUSTOM_NODES_IMAGE}"; then
-  NO_CACHE="--no-cache"
-fi
-if [ "$REBUILD_NODES" = true ]; then
-  DOCKER_BUILDKIT=1 docker build ${NO_CACHE} -f Dockerfile.custom_nodes -t "${CUSTOM_NODES_IMAGE}" .
-fi
 # Stage 3: ComfyUI
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false

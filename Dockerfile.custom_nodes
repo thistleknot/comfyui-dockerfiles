@@ -1,7 +1,7 @@
 FROM ml-base:cu126-pt26
 
 # Copy lists only (for layer cache)
-COPY custom_node_repos_build.txt /tmp/custom_node_repos.txt
+COPY custom_node_repos.txt /tmp/custom_node_repos.txt
 
 # PRE-DOWNLOAD requirements without cloning (this layer caches if repos list unchanged)
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
