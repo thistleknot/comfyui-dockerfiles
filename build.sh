@@ -108,24 +108,31 @@ else
   echo "[2/3] Skipping custom nodes (unchanged since $(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 fi
 
+if [ "$REBUILD_NODES" = true ]; then
+  DOCKER_BUILDKIT=1 docker build \
+    -f Dockerfile.custom_nodes \
+    --build-arg BASE_IMAGE="${ML_BASE_IMAGE}" \
+    -t "${CUSTOM_NODES_IMAGE}" .
+fi
+
 # Stage 3: ComfyUI
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
 
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
-  echo "  → Building (image missing)"
+  echo "  ? Building (image missing)"
   REBUILD_COMFY=true
 elif [ "$REBUILD_NODES" = true ]; then
-  echo "  → Rebuilding (custom nodes changed)"
+  echo "  ? Rebuilding (custom nodes changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "Dockerfile.comfyui" "${FINAL_IMAGE}"; then
-  echo "  → Rebuilding (Dockerfile.comfyui changed)"
+  echo "  ? Rebuilding (Dockerfile.comfyui changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "extra_packages.txt" "${FINAL_IMAGE}"; then
-  echo "  → Rebuilding (extra_packages.txt changed)"
+  echo "  ? Rebuilding (extra_packages.txt changed)"
   REBUILD_COMFY=true
 else
-  echo "  → Rebuilding anyway (always fresh)"
+  echo "  ? Rebuilding anyway (always fresh)"
   REBUILD_COMFY=true
 fi
 

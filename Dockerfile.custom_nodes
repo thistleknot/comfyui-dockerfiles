@@ -6,16 +6,30 @@ COPY custom_node_repos.txt /tmp/custom_node_repos.txt
 # PRE-DOWNLOAD requirements without cloning (this layer caches if repos list unchanged)
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     mkdir -p /tmp/requirements && \
+    echo "=== Fetching requirements.txt from custom node repos ===" && \
     while IFS= read -r repo || [ -n "$repo" ]; do \
         [ -z "$repo" ] && continue; \
         case "$repo" in \#*) continue ;; esac; \
         node_name=$(basename "$repo"); \
-        curl -sL "https://raw.githubusercontent.com/${repo}/main/requirements.txt" > /tmp/requirements/${node_name}.txt 2>/dev/null || \
-        curl -sL "https://raw.githubusercontent.com/${repo}/master/requirements.txt" > /tmp/requirements/${node_name}.txt 2>/dev/null || true; \
+        if curl -fsSL --retry 3 --retry-delay 2 \
+            "https://raw.githubusercontent.com/${repo}/main/requirements.txt" \
+            -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
+            mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
+            echo "✓ ${repo} (main)"; \
+        elif curl -fsSL --retry 3 --retry-delay 2 \
+            "https://raw.githubusercontent.com/${repo}/master/requirements.txt" \
+            -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
+            mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
+            echo "✓ ${repo} (master)"; \
+        else \
+            echo "⚠ ${repo} (no requirements.txt)"; \
+        fi; \
     done < /tmp/custom_node_repos.txt && \
+    echo "=== Merging requirements ===" && \
     cat /tmp/requirements/*.txt 2>/dev/null | \
-    grep -v '^#' | grep -v '^$' | sed 's/#.*//' | sed 's/[[:space:]]*$//' | \
+    grep -v '^#' | grep -v '^$' | grep -v '^-' | sed 's/#.*//' | sed 's/[[:space:]]*$//' | \
     sort | uniq > /tmp/all_requirements.txt && \
+    echo "=== Combined $(wc -l < /tmp/all_requirements.txt) unique package requirements ===" && \
     if [ -s /tmp/all_requirements.txt ]; then \
         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/all_requirements.txt || \
         (while IFS= read -r pkg; do \
