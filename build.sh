@@ -5,6 +5,7 @@ set -e
 ML_BASE_IMAGE="ml-base:cu126-pt26"
 CUSTOM_NODES_IMAGE="custom-nodes-ready:cu126-pt26"
 FINAL_IMAGE="sd-worker:latest"
+STAGING_IMAGE="sd-worker:staging"
 
 # Parse arguments
 FORCE_BASE=false
@@ -115,32 +116,54 @@ if [ "$REBUILD_NODES" = true ]; then
     -t "${CUSTOM_NODES_IMAGE}" .
 fi
 
-# Stage 3: ComfyUI
+# Stage 3: ComfyUI (Blue-Green Deployment)
 echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
 
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
-  echo "  ? Building (image missing)"
+  echo "  → Building (image missing)"
   REBUILD_COMFY=true
 elif [ "$REBUILD_NODES" = true ]; then
-  echo "  ? Rebuilding (custom nodes changed)"
+  echo "  → Rebuilding (custom nodes changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "Dockerfile.comfyui" "${FINAL_IMAGE}"; then
-  echo "  ? Rebuilding (Dockerfile.comfyui changed)"
+  echo "  → Rebuilding (Dockerfile.comfyui changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "extra_packages.txt" "${FINAL_IMAGE}"; then
-  echo "  ? Rebuilding (extra_packages.txt changed)"
+  echo "  → Rebuilding (extra_packages.txt changed)"
   REBUILD_COMFY=true
 else
-  echo "  ? Rebuilding anyway (always fresh)"
+  echo "  → Rebuilding anyway (always fresh)"
   REBUILD_COMFY=true
 fi
 
 if [ "$REBUILD_COMFY" = true ]; then
+  echo ""
+  echo "=== Blue-Green Deployment ==="
+  echo "[BUILD] Building staging image: ${STAGING_IMAGE}"
+  
   DOCKER_BUILDKIT=1 docker build \
     -f Dockerfile.comfyui \
     --build-arg BASE_IMAGE="${CUSTOM_NODES_IMAGE}" \
-    -t "${FINAL_IMAGE}" .
+    -t "${STAGING_IMAGE}" .
+  
+  echo "[SWITCH] Swapping images (zero-downtime)..."
+  
+  # Remove old production image
+  if docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
+    echo "  → Removing old production image"
+    docker rmi "${FINAL_IMAGE}" 2>/dev/null || true
+  fi
+  
+  # Tag staging as production
+  echo "  → Promoting staging → production"
+  docker tag "${STAGING_IMAGE}" "${FINAL_IMAGE}"
+  
+  # Clean up staging tag
+  echo "  → Cleaning up staging tag"
+  docker rmi "${STAGING_IMAGE}" 2>/dev/null || true
+  
+  echo "[DONE] Image swapped successfully"
 fi
 
 echo ""
@@ -149,3 +172,5 @@ echo "Images:"
 echo "  1. ${ML_BASE_IMAGE} ($(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  2. ${CUSTOM_NODES_IMAGE} ($(docker image inspect ${CUSTOM_NODES_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo "  3. ${FINAL_IMAGE} ($(docker image inspect ${FINAL_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+echo ""
+echo "Current image in use: ${FINAL_IMAGE}"

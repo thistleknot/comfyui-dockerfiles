@@ -96,3 +96,5 @@ keyboard
 # Fix numpy conflict - Inspire Pack needs <2.0
 # numpy<2.0
 pywavelets
+opencv-contrib-python
+color-matcher
