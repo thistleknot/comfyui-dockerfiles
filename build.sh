@@ -7,6 +7,11 @@ CUSTOM_NODES_IMAGE="custom-nodes-ready:cu126-pt26"
 FINAL_IMAGE="sd-worker:latest"
 STAGING_IMAGE="sd-worker:staging"
 
+# Create logs directory
+LOGS_DIR="build_logs"
+mkdir -p "${LOGS_DIR}"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
 # Parse arguments
 FORCE_BASE=false
 FORCE_NODES=false
@@ -58,7 +63,7 @@ else
 fi
 
 if [ "$RUN_ANALYSIS" = true ]; then
-  ./find_compatible_builds.sh custom_nodes custom_node_repos.txt || { echo "Analysis failed"; exit 1; }
+  ./find_compatible_builds.sh custom_nodes custom_node_repos.txt 2>&1 | tee "${LOGS_DIR}/analysis_${TIMESTAMP}.log"
   cp build_configs/set-unified.txt custom_node_repos.txt
 fi
 
@@ -85,7 +90,13 @@ else
 fi
 
 if [ "$REBUILD_BASE" = true ]; then
-  DOCKER_BUILDKIT=1 docker build -f Dockerfile.base -t "${ML_BASE_IMAGE}" .
+  echo "Building ${ML_BASE_IMAGE}... (logging to ${LOGS_DIR}/base_${TIMESTAMP}.log)"
+  DOCKER_BUILDKIT=1 docker build -f Dockerfile.base -t "${ML_BASE_IMAGE}" . 2>&1 | tee "${LOGS_DIR}/base_${TIMESTAMP}.log"
+  BUILD_EXIT_CODE=${PIPESTATUS[0]}
+  if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo "ERROR: Base build failed. Check ${LOGS_DIR}/base_${TIMESTAMP}.log"
+    exit $BUILD_EXIT_CODE
+  fi
 fi
 
 # Stage 2: Custom nodes
@@ -110,10 +121,16 @@ else
 fi
 
 if [ "$REBUILD_NODES" = true ]; then
+  echo "Building ${CUSTOM_NODES_IMAGE}... (logging to ${LOGS_DIR}/nodes_${TIMESTAMP}.log)"
   DOCKER_BUILDKIT=1 docker build \
     -f Dockerfile.custom_nodes \
     --build-arg BASE_IMAGE="${ML_BASE_IMAGE}" \
-    -t "${CUSTOM_NODES_IMAGE}" .
+    -t "${CUSTOM_NODES_IMAGE}" . 2>&1 | tee "${LOGS_DIR}/nodes_${TIMESTAMP}.log"
+  BUILD_EXIT_CODE=${PIPESTATUS[0]}
+  if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo "ERROR: Custom nodes build failed. Check ${LOGS_DIR}/nodes_${TIMESTAMP}.log"
+    exit $BUILD_EXIT_CODE
+  fi
 fi
 
 # Stage 3: ComfyUI (Blue-Green Deployment)
@@ -141,11 +158,18 @@ if [ "$REBUILD_COMFY" = true ]; then
   echo ""
   echo "=== Blue-Green Deployment ==="
   echo "[BUILD] Building staging image: ${STAGING_IMAGE}"
+  echo "Logging to ${LOGS_DIR}/comfyui_${TIMESTAMP}.log"
   
   DOCKER_BUILDKIT=1 docker build \
     -f Dockerfile.comfyui \
     --build-arg BASE_IMAGE="${CUSTOM_NODES_IMAGE}" \
-    -t "${STAGING_IMAGE}" .
+    -t "${STAGING_IMAGE}" . 2>&1 | tee "${LOGS_DIR}/comfyui_${TIMESTAMP}.log"
+  BUILD_EXIT_CODE=${PIPESTATUS[0]}
+  
+  if [ $BUILD_EXIT_CODE -ne 0 ]; then
+    echo "ERROR: ComfyUI build failed. Check ${LOGS_DIR}/comfyui_${TIMESTAMP}.log"
+    exit $BUILD_EXIT_CODE
+  fi
   
   echo "[SWITCH] Swapping images (zero-downtime)..."
   
@@ -174,3 +198,4 @@ echo "  2. ${CUSTOM_NODES_IMAGE} ($(docker image inspect ${CUSTOM_NODES_IMAGE} -
 echo "  3. ${FINAL_IMAGE} ($(docker image inspect ${FINAL_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 echo ""
 echo "Current image in use: ${FINAL_IMAGE}"
+echo "Build logs saved in: ${LOGS_DIR}/"
