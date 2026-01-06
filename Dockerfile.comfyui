@@ -50,7 +50,7 @@ WORKDIR /default-comfyui-bundle/ComfyUI
 RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
 
 # Layer 4: Initialize ComfyUI (download models, setup nodes) without running server
-RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 360; kill $! 2>/dev/null || true
+RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 180; kill $! 2>/dev/null || true
 
 # Layer 5: Update config to enable custom node installation
 RUN cat > /tmp/update_config.py << 'EOF'

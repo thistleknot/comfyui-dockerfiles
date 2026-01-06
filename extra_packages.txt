@@ -1,8 +1,10 @@
 # Manual package fixes for nodes with incomplete requirements.txt
 
 # OpenCV (required by many nodes)
-opencv-python
-opencv-python-headless
+
+# use: opencv-contrib-python instead
+# opencv-python
+# opencv-python-headless
 
 # Missing from various nodes
 openai-agents
@@ -98,3 +100,4 @@ keyboard
 pywavelets
 opencv-contrib-python
 color-matcher
+facexlib
