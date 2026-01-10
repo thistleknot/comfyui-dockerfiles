@@ -101,3 +101,4 @@ pywavelets
 opencv-contrib-python
 color-matcher
 facexlib
+onnxruntime
