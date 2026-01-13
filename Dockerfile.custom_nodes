@@ -3,6 +3,15 @@ FROM ml-base:cu126-pt26
 # Copy lists only (for layer cache)
 COPY custom_node_repos.txt /tmp/custom_node_repos.txt
 
+# Create special pulls config inline
+RUN cat > /tmp/custom_node_special_pulls.txt << 'EOF'
+# Format: repo_path|ref|type
+# type: pr, commit, or branch
+
+# GGUF node - PR #399 for compatibility fix
+city96/ComfyUI-GGUF|399|pr
+EOF
+
 # PRE-DOWNLOAD requirements without cloning (this layer caches if repos list unchanged)
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     mkdir -p /tmp/requirements && \
@@ -49,6 +58,55 @@ RUN mkdir -p /custom_nodes_staged /install_logs && \
         git clone --depth 1 https://github.com/${repo}.git /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log || \
         echo "Failed: $repo" | tee -a /install_logs/failed_clones.txt; \
     done < /tmp/custom_node_repos.txt
+
+# Handle special PR/branch/commit pulls
+RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then \
+        echo "=== Processing Special Pulls ===" | tee -a /install_logs/install.log; \
+        while IFS='|' read -r repo ref type || [ -n "$repo" ]; do \
+            [ -z "$repo" ] && continue; \
+            case "$repo" in \#*) continue ;; esac; \
+            node_name=$(basename "$repo"); \
+            target_dir="/custom_nodes_staged/${node_name}"; \
+            echo "Processing special pull: ${repo} (${type}: ${ref})" | tee -a /install_logs/install.log; \
+            if [ -d "$target_dir" ]; then \
+                cd "$target_dir" && \
+                case "$type" in \
+                    pr) \
+                        echo "Fetching PR #${ref}" | tee -a /install_logs/install.log; \
+                        git fetch origin pull/${ref}/head:pr-${ref} && \
+                        git checkout pr-${ref} && \
+                        echo "✓ Checked out PR #${ref}" | tee -a /install_logs/install.log; \
+                        ;; \
+                    commit) \
+                        echo "Fetching commit ${ref}" | tee -a /install_logs/install.log; \
+                        git fetch --depth=1 origin ${ref} && \
+                        git checkout ${ref} && \
+                        echo "✓ Checked out commit ${ref}" | tee -a /install_logs/install.log; \
+                        ;; \
+                    branch) \
+                        echo "Switching to branch ${ref}" | tee -a /install_logs/install.log; \
+                        git fetch origin ${ref} && \
+                        git checkout ${ref} && \
+                        echo "✓ Checked out branch ${ref}" | tee -a /install_logs/install.log; \
+                        ;; \
+                    *) \
+                        echo "⚠ Unknown type: ${type}" | tee -a /install_logs/failed_clones.txt; \
+                        ;; \
+                esac || echo "Failed special pull: ${repo}" | tee -a /install_logs/failed_clones.txt; \
+            else \
+                echo "⚠ Node not found, cloning with special ref" | tee -a /install_logs/install.log; \
+                git clone https://github.com/${repo}.git "$target_dir" 2>&1 | tee -a /install_logs/clone.log && \
+                cd "$target_dir" && \
+                case "$type" in \
+                    pr) git fetch origin pull/${ref}/head:pr-${ref} && git checkout pr-${ref} ;; \
+                    commit) git fetch origin ${ref} && git checkout ${ref} ;; \
+                    branch) git fetch origin ${ref} && git checkout ${ref} ;; \
+                esac || echo "Failed: ${repo}" | tee -a /install_logs/failed_clones.txt; \
+            fi; \
+        done < /tmp/custom_node_special_pulls.txt; \
+    else \
+        echo "=== No special pulls configured ===" | tee -a /install_logs/install.log; \
+    fi
 
 ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"

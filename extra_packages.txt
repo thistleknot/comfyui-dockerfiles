@@ -102,3 +102,7 @@ opencv-contrib-python
 color-matcher
 facexlib
 onnxruntime
+rotary-embedding-torch
+colored
+polygraphy
+tensorrt
