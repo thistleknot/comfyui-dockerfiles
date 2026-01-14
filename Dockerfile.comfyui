@@ -52,13 +52,13 @@ RUN cd ComfyUI && \
         models/checkpoints models/vae models/loras models/embeddings \
         models/controlnet models/clip models/unet models/upscale_models \
         models/animatediff_models \
+        models/tensorrt/rife \
         input output temp custom_nodes user/default && \
     mv ../ComfyUI-Manager custom_nodes/ && \
     if [ -d /custom_nodes_staged ] && [ "$(ls -A /custom_nodes_staged 2>/dev/null)" ]; then \
         cp -r /custom_nodes_staged/* custom_nodes/; \
     fi && \
     chmod -R 755 /default-comfyui-bundle/ComfyUI
-
 WORKDIR /default-comfyui-bundle/ComfyUI
 
 # Layer 3.5: Re-ensure problematic packages are installed AFTER custom nodes copied
