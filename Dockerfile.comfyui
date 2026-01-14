@@ -70,6 +70,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
 # Layer 4: Copy local depth-anything model
 # COPY ./custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
 RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
+RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/
 
 # Layer 5: Initialize ComfyUI (download models, setup nodes) without running server
 # Note: NVML and AnimateDiff warnings are expected during CPU-only init
@@ -106,6 +107,5 @@ ENTRYPOINT ["/bin/bash", "-c", "\
 #docker run -it --rm --gpus all -p 8188:8188 \
   #-v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models \
   #-v /mnt/external/models/depth-anything/Depth-Anything-V2-Large:/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large \
+  #-v /mnt/external/models/lipsync:/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints \
   #sd-worker:latest
-  
-  
