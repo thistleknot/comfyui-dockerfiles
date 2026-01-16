@@ -1,1 +1,108 @@
-../custom_node_repos.txt
+## Core Workflow & UI Enhancement
+chrisgoringe/cg-use-everywhere
+pythongosssss/ComfyUI-Custom-Scripts
+rgthree/rgthree-comfy
+yolain/ComfyUI-Easy-Use
+## Model Loading & Format Support
+city96/ComfyUI-GGUF
+city96/ComfyUI_ExtraModels
+## Control & Conditioning
+Fannovel16/comfyui_controlnet_aux
+Kosinkadink/ComfyUI-Advanced-ControlNet
+cubiq/ComfyUI_IPAdapter_plus
+Shakker-Labs/ComfyUI-IPAdapter-Flux
+cubiq/ComfyUI_InstantID
+## Animation & Video
+Kosinkadink/ComfyUI-AnimateDiff-Evolved
+Kosinkadink/ComfyUI-VideoHelperSuite
+kijai/ComfyUI-WanVideoWrapper
+raindrop313/ComfyUI-WanVideoStartEndFrames
+MixLabPro/comfyui-liveportrait
+## Quality & Upscaling
+ltdrdata/ComfyUI-Impact-Pack
+ltdrdata/ComfyUI-Impact-Subpack
+ltdrdata/ComfyUI-Inspire-Pack
+ssitu/ComfyUI_UltimateSDUpscale
+traugdor/ComfyUI-UltimateSDUpscale-GGUF
+## Face & Character
+Gourieff/ComfyUI-ReActor
+# Gourieff/comfyui-reactor-node
+nosiu/comfyui-instantId-faceswap
+# cannot import name '_wrapped_flash_attn_backward' from 'flash_attn.flash_attn_interface' (/venv/lib/python3.12/site-packages/flash_attn/flash_attn_interface.py
+# SamKhoze/ComfyUI-DeepFuze
+SparknightLLC/ComfyUI-GPENO
+## Inference Optimization & Performance
+Zehong-Ma/ComfyUI-MagCache
+willblaschko/ComfyUI-Unload-Models
+mcmonkeyprojects/sd-dynamic-thresholding
+## LLM & Vision Models
+heshengtao/comfyui_LLM_party
+# kijai/ComfyUI-Florence2
+KLL535/ComfyUI_Simple_Qwen3-VL-gguf
+1038lab/ComfyUI-QwenVL
+alexcong/ComfyUI_QwenVL
+#al-swaiti/ComfyUI-OllamaGemini
+# Yuan-ManX/ComfyUI-OmniGen2
+## Image Processing & Utilities
+chrisgoringe/cg-image-filter
+chrisgoringe/cg-image-picker
+giriss/comfy-image-saver
+cubiq/ComfyUI_essentials
+WASasquatch/was-node-suite-comfyui
+Suzie1/ComfyUI_Comfyroll_CustomNodes
+crystian/ComfyUI-Crystools
+# deepfuze error
+# Jannchie/ComfyUI-J
+kijai/ComfyUI-KJNodes
+Derfuu/Derfuu_ComfyUI_ModdedNodes
+fearnworks/ComfyUI_FearnworksNodes
+chflame163/ComfyUI_LayerStyle
+## Prompting & Creative Tools
+adieyal/comfyui-dynamicprompts
+AIrjen/OneButtonPrompt
+FizzleDorf/ComfyUI_FizzNodes
+yawiii/comfyui_prompt_assistant
+alt-key-project/comfyui-dream-project
+alt-key-project/comfyui-dream-video-batches
+## Segmentation & Masking
+storyicon/comfyui_segment_anything
+## Tagging & Captioning
+# cannot import name 'set_legacy_print_mode' from 'numpy.core.multiarray'
+# pythongosssss/ComfyUI-WD14-Tagger
+## broken
+## christian-byrne/img2txt-comfyui-nodes
+## Specialized Features
+# kijai/ComfyUI-FluxTrainer
+# DJ-Tribefull/Comfyui_FOCUS_nodes
+# ImportError: cannot import name 'set_legacy_print_mode' from 'numpy.core.multiarray'
+# roundyyy/ComfyUI-mesh-simplifier
+# from modules.impact.hooks import DetailerHook ModuleNotFoundError: No module named 'modules'
+# Gue-e/ComfyUI-PanoCard
+# WhatDreamsCost/Spline-Path-Control
+aria1th/ComfyUI-LogicUtils
+## Development & Debug
+AIDC-AI/ComfyUI-Copilot
+ClownsharkBatwing/RES4LYF
+GACLove/ComfyUI-VFI
+ComfyUI-GIMM-VFI
+ComplexRobot/ComfyUI-Simple-VFI
+stduhpf/ComfyUI--Wan22FirstLastFrameToVideoLatent
+SparknightLLC/ComfyUI-LatentClamp
+Clybius/ComfyUI-Latent-Modifiers
+kuschanow/ComfyUI-Advanced-Latent-Control
+SeanScripts/ComfyUI-Unload-Model
+SparknightLLC/ComfyUI-GPENO
+kuschanow/ComfyUI-Advanced-Latent-Control
+PozzettiAndrea/ComfyUI-SAM3
+tungdop2/Comfyui_face_restorer
+Lightricks/ComfyUI-LTXVideo
+numz/ComfyUI-SeedVR2_VideoUpscaler
+GACLove/ComfyUI-VFI
+silveroxides/ComfyUI_RIFE_TensorRT_Auto
+yuvraj108c/ComfyUI-Rife-Tensorrt
+ShmuelRonen/ComfyUI_wav2lip
+kijai/ComfyUI-MelBandRoFormer
+theUpsider/ComfyUI-Logic
+danTheMonk/comfyui-int-and-float
+mav-rik/facerestore_cf
+Fannovel16/ComfyUI-Frame-Interpolation
