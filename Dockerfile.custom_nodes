@@ -2,6 +2,7 @@ FROM ml-base:cu126-pt26
 
 # Copy lists only (for layer cache)
 COPY custom_node_repos.txt /tmp/custom_node_repos.txt
+COPY special_custom_nodes.txt /tmp/special_custom_nodes.txt
 
 # Create special pulls config inline
 RUN cat > /tmp/custom_node_special_pulls.txt << 'EOF'
@@ -24,16 +25,36 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
             "https://raw.githubusercontent.com/${repo}/main/requirements.txt" \
             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
-            echo "✓ ${repo} (main)"; \
+            echo "? ${repo} (main)"; \
         elif curl -fsSL --retry 3 --retry-delay 2 \
             "https://raw.githubusercontent.com/${repo}/master/requirements.txt" \
             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
-            echo "✓ ${repo} (master)"; \
+            echo "? ${repo} (master)"; \
         else \
-            echo "⚠ ${repo} (no requirements.txt)"; \
+            echo "? ${repo} (no requirements.txt)"; \
         fi; \
     done < /tmp/custom_node_repos.txt && \
+    echo "=== Fetching requirements.txt from special custom nodes ===" && \
+    while IFS= read -r git_url || [ -n "$git_url" ]; do \
+        [ -z "$git_url" ] && continue; \
+        case "$git_url" in \#*) continue ;; esac; \
+        node_name=$(basename "$git_url" .git); \
+        raw_url=$(echo "$git_url" | sed -e 's|github.com/|raw.githubusercontent.com/|' -e 's|\.git$||'); \
+        if curl -fsSL --retry 3 --retry-delay 2 \
+            "${raw_url}/main/requirements.txt" \
+            -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
+            mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
+            echo "? ${git_url} (main)"; \
+        elif curl -fsSL --retry 3 --retry-delay 2 \
+            "${raw_url}/master/requirements.txt" \
+            -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then \
+            mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt; \
+            echo "? ${git_url} (master)"; \
+        else \
+            echo "? ${git_url} (no requirements.txt)"; \
+        fi; \
+    done < /tmp/special_custom_nodes.txt && \
     echo "=== Merging requirements ===" && \
     cat /tmp/requirements/*.txt 2>/dev/null | \
     grep -v '^#' | grep -v '^$' | grep -v '^-' | sed 's/#.*//' | sed 's/[[:space:]]*$//' | \
@@ -57,7 +78,16 @@ RUN mkdir -p /custom_nodes_staged /install_logs && \
         echo "Cloning: $repo" | tee -a /install_logs/install.log; \
         git clone --depth 1 https://github.com/${repo}.git /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log || \
         echo "Failed: $repo" | tee -a /install_logs/failed_clones.txt; \
-    done < /tmp/custom_node_repos.txt
+    done < /tmp/custom_node_repos.txt && \
+    echo "=== Cloning Special Custom Nodes ===" | tee -a /install_logs/install.log && \
+    while IFS= read -r git_url || [ -n "$git_url" ]; do \
+        [ -z "$git_url" ] && continue; \
+        case "$git_url" in \#*) continue ;; esac; \
+        node_name=$(basename "$git_url" .git); \
+        echo "Cloning: $git_url -> $node_name" | tee -a /install_logs/install.log; \
+        git clone --depth 1 "$git_url" /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log || \
+        echo "Failed: $git_url" | tee -a /install_logs/failed_clones.txt; \
+    done < /tmp/special_custom_nodes.txt
 
 # Handle special PR/branch/commit pulls
 RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then \
@@ -75,26 +105,26 @@ RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then \
                         echo "Fetching PR #${ref}" | tee -a /install_logs/install.log; \
                         git fetch origin pull/${ref}/head:pr-${ref} && \
                         git checkout pr-${ref} && \
-                        echo "✓ Checked out PR #${ref}" | tee -a /install_logs/install.log; \
+                        echo "? Checked out PR #${ref}" | tee -a /install_logs/install.log; \
                         ;; \
                     commit) \
                         echo "Fetching commit ${ref}" | tee -a /install_logs/install.log; \
                         git fetch --depth=1 origin ${ref} && \
                         git checkout ${ref} && \
-                        echo "✓ Checked out commit ${ref}" | tee -a /install_logs/install.log; \
+                        echo "? Checked out commit ${ref}" | tee -a /install_logs/install.log; \
                         ;; \
                     branch) \
                         echo "Switching to branch ${ref}" | tee -a /install_logs/install.log; \
                         git fetch origin ${ref} && \
                         git checkout ${ref} && \
-                        echo "✓ Checked out branch ${ref}" | tee -a /install_logs/install.log; \
+                        echo "? Checked out branch ${ref}" | tee -a /install_logs/install.log; \
                         ;; \
                     *) \
-                        echo "⚠ Unknown type: ${type}" | tee -a /install_logs/failed_clones.txt; \
+                        echo "? Unknown type: ${type}" | tee -a /install_logs/failed_clones.txt; \
                         ;; \
                 esac || echo "Failed special pull: ${repo}" | tee -a /install_logs/failed_clones.txt; \
             else \
-                echo "⚠ Node not found, cloning with special ref" | tee -a /install_logs/install.log; \
+                echo "? Node not found, cloning with special ref" | tee -a /install_logs/install.log; \
                 git clone https://github.com/${repo}.git "$target_dir" 2>&1 | tee -a /install_logs/clone.log && \
                 cd "$target_dir" && \
                 case "$type" in \
