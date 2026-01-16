@@ -106,3 +106,4 @@ rotary-embedding-torch
 colored
 polygraphy
 tensorrt
+lpips
