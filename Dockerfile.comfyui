@@ -38,7 +38,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     if [ -s /tmp/extra_packages.txt ]; then \
         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt; \
     fi && \
-    grep -v -E 'nvdiffrast|tensorrt' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt && \
+    grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt && \
     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
 
 # Layer 2b: Install nvdiffrast separately with proper PyTorch visibility

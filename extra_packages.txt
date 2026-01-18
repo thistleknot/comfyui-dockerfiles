@@ -107,5 +107,4 @@ colored
 polygraphy
 tensorrt
 lpips
-oidn
-oidn-python
+oidn>=0.2
