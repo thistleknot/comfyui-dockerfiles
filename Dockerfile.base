@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.12 python3.12-dev python3.12-venv python3-pip \
     git cmake build-essential \
     portaudio19-dev libportaudio2 \
-    ffmpeg libsm6 libxext6 && \
+    ffmpeg libsm6 libxext6 \
+    libtbb12 && \
     rm -rf /var/lib/apt/lists/*
 
 # Layer 1: PyTorch 2.6.0 + UV
