@@ -107,3 +107,4 @@ colored
 polygraphy
 tensorrt
 lpips
+oidn
