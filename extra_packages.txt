@@ -108,3 +108,4 @@ polygraphy
 tensorrt
 lpips
 oidn
+oidn-python
