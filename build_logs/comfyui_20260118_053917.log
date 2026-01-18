@@ -1,0 +1,49 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 5.74kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 1.58kB done
+#4 DONE 0.0s
+
+#5 [stage-0  2/18] WORKDIR /default-comfyui-bundle
+#5 CACHED
+
+#6 [stage-0  3/18] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#6 CACHED
+
+#7 [stage-0  5/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#7 CACHED
+
+#8 [stage-0  6/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#8 ERROR: failed to calculate checksum of ref 4be0472b-5f7b-4be4-88cd-1c17a18321b2::nkmkfe7nvs9hqo9nmh6o5ga8d: "/special_logic_requirements.txt": not found
+
+#9 [stage-0  4/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#9 ERROR: failed to calculate checksum of ref 4be0472b-5f7b-4be4-88cd-1c17a18321b2::nkmkfe7nvs9hqo9nmh6o5ga8d: "/special_logic_requirements.txt": not found
+
+#10 [stage-0  1/18] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#10 DONE 0.1s
+------
+ > [stage-0  4/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt:
+------
+------
+ > [stage-0  6/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt:
+------
+Dockerfile.comfyui:22
+--------------------
+  20 |     
+  21 |     # Layer 1.5: Install packages requiring special handling (broken source dists)
+  22 | >>> COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+  23 |     RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+  24 |         if [ -s /tmp/special_logic_requirements.txt ]; then \
+--------------------
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref 4be0472b-5f7b-4be4-88cd-1c17a18321b2::nkmkfe7nvs9hqo9nmh6o5ga8d: "/special_logic_requirements.txt": not found

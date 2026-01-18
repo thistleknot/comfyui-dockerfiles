@@ -108,3 +108,4 @@ mav-rik/facerestore_cf
 Fannovel16/ComfyUI-Frame-Interpolation
 benjamin-bertram/Comfyui_OIDN_Denoiser
 Anze-/ComfyUI-OIDN
+BigStationW/ComfyUi-Scale-Image-to-Total-Pixels-Advanced

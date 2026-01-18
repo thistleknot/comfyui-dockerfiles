@@ -1,0 +1,30 @@
+# Packages with broken source distributions that need special handling
+# Install these BEFORE main requirements to avoid build issues
+
+# pilmoji 2.0.5 has broken setup.py, 2.0.4 has working wheel
+pilmoji==2.0.4
+
+# dghs-imgutils needs pilmoji pre-installed to avoid triggering broken 2.0.5 build
+dghs-imgutils[gpu]
+
+# TensorRT for RIFE frame interpolation nodes (ComfyUI_RIFE_TensorRT_Auto, ComfyUI-Rife-Tensorrt)
+# Requires build isolation for proper CUDA detection - cannot use --no-build-isolation
+tensorrt-cu13>=10.0.0
+
+# CUDA Python bindings required by TensorRT nodes for cudart access
+# Provides cuda.bindings.runtime and cuda.bindings.driver modules
+cuda-python>=12.6.0
+
+# Flash Attention pinned for SeedVR2 video upscaler compatibility
+# Version 2.6.3 provides _wrapped_flash_attn_backward API required by diffusers 0.30.0
+flash-attn==2.6.3
+diffusers==0.30.0
+
+# OpenCV with extended image processing modules for LayerStyle nodes
+# Provides guidedFilter and other ximgproc functions
+opencv-contrib-python>=4.8.0
+
+# ONNX Runtime with CUDA acceleration for GPU inference
+# Must install AFTER custom node requirements to override CPU-only onnxruntime
+# Used by: Impact Pack, FizzNodes, ControlNet Aux (face/pose/depth detection)
+onnxruntime-gpu
