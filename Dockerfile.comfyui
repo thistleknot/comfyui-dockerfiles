@@ -61,29 +61,18 @@ RUN cd ComfyUI && \
 WORKDIR /default-comfyui-bundle/ComfyUI
 
 # Layer 3.5: Re-ensure problematic packages are installed AFTER custom nodes copied
-# This prevents custom node install.py scripts from trying to build from source
-RUN --mount=type=cache,target=/pip-cache,id=pip-external \
-    /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
-    /venv/bin/pip install --no-deps dghs-imgutils
-
-RUN --mount=type=cache,target=/pip-cache,id=pip-external \
-    /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
-    /venv/bin/pip install --no-deps dghs-imgutils && \
-    /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
-    /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
-    python3 - << 'EOF'
-import pathlib
-p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
-if p.exists():
-    p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
-EOF
-
+# - pilmoji/dghs-imgutils: prevent broken 2.0.5 build trigger
+# - opencv-contrib-python 4.13: provides guidedFilter for LayerStyle
+# - pycocotools: required by ComfyUI-RMBG SAM3 segment nodes
+# - onnxruntime-gpu: force last-write to override any CPU-only onnxruntime from node requirements
+# - SAM3 prestartup patch: comfy_env not available at prestartup time, wrap in try/except
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
     /venv/bin/pip install --no-deps dghs-imgutils && \
     /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 && \
     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
     /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
+    /venv/bin/pip install --no-deps onnxruntime-gpu && \
     python3 - << 'EOF'
 import pathlib
 p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
@@ -91,21 +80,11 @@ if p.exists():
     p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
 EOF
 
-# Layer 3.6: Patch SAM3 prestartup - comfy_env not available at prestartup time
-RUN python3 - << 'EOF'
-import pathlib
-p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
-if p.exists():
-    p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
-EOF
-
-# Layer 4: Copy local depth-anything model
-# COPY ./custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
-RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
-RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/
-RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
-RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/
-RUN mkdir -p /default-comfyui-bundle/ComfyUI/models/animatediff_models/
+# Layer 4: Ensure mount point directories exist
+RUN mkdir -p \
+    /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large \
+    /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints \
+    /default-comfyui-bundle/ComfyUI/models/animatediff_models
 
 # Layer 5: Initialize ComfyUI (download models, setup nodes) without running server
 # Note: NVML and AnimateDiff warnings are expected during CPU-only init
@@ -124,7 +103,6 @@ if os.path.exists(config_path):
         config = {}
 else:
     config = {}
-# Enable custom node installation
 config['Comfy.NodeLibrary.Bookmarks.V2'] = []
 config['Comfy.UseNewMenu'] = 'Top'
 config['Comfy.NodeLibrary.EnableInstall'] = True
