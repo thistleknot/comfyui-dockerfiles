@@ -73,7 +73,7 @@ json-repair
 llama-index-core
 llama-index-llms-openai
 mcp
-moviepy
+moviepy<2.0
 peft
 pygments
 qwen-vl-utils
