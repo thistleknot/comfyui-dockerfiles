@@ -101,7 +101,7 @@ pywavelets
 opencv-contrib-python
 color-matcher
 facexlib
-onnxruntime
+#onnxruntime
 rotary-embedding-torch
 colored
 polygraphy

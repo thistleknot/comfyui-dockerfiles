@@ -22,9 +22,10 @@ diffusers==0.30.0
 
 # OpenCV with extended image processing modules for LayerStyle nodes
 # Provides guidedFilter and other ximgproc functions
-opencv-contrib-python>=4.8.0
+#opencv-contrib-python>=4.13.0
 
 # ONNX Runtime with CUDA acceleration for GPU inference
 # Must install AFTER custom node requirements to override CPU-only onnxruntime
 # Used by: Impact Pack, FizzNodes, ControlNet Aux (face/pose/depth detection)
-onnxruntime-gpu
+#onnxruntime-gpu
+numpy<2.0

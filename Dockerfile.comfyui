@@ -66,6 +66,39 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
     /venv/bin/pip install --no-deps dghs-imgutils
 
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
+    /venv/bin/pip install --no-deps dghs-imgutils && \
+    /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
+    /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
+    python3 - << 'EOF'
+import pathlib
+p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
+if p.exists():
+    p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
+EOF
+
+RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+    /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
+    /venv/bin/pip install --no-deps dghs-imgutils && \
+    /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 && \
+    /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
+    /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
+    python3 - << 'EOF'
+import pathlib
+p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
+if p.exists():
+    p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
+EOF
+
+# Layer 3.6: Patch SAM3 prestartup - comfy_env not available at prestartup time
+RUN python3 - << 'EOF'
+import pathlib
+p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")
+if p.exists():
+    p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
+EOF
+
 # Layer 4: Copy local depth-anything model
 # COPY ./custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/depth_anything_v2_vitl.pth
 RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/

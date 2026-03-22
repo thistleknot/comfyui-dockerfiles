@@ -1,0 +1,66 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 7.61kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0  1/22] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.48kB done
+#5 DONE 0.0s
+
+#6 [stage-0  2/22] WORKDIR /default-comfyui-bundle
+#6 CACHED
+
+#7 [stage-0  3/22] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#7 CACHED
+
+#8 [stage-0  4/22] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#8 DONE 0.0s
+
+#9 [stage-0  5/22] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#9 0.170 Using Python 3.12.3 environment at: /venv
+#9 0.491   × No solution found when resolving dependencies:
+#9 0.491   ╰─▶ Because only the following versions of opencv-contrib-python are
+#9 0.491       available:
+#9 0.491           opencv-contrib-python<4.13.0
+#9 0.491           opencv-contrib-python==4.13.0.90
+#9 0.491           opencv-contrib-python==4.13.0.92
+#9 0.491       and opencv-contrib-python>=4.13.0.90 depends on numpy>=2, we can
+#9 0.491       conclude that opencv-contrib-python>=4.13.0 depends on numpy>=2.
+#9 0.491       And because you require opencv-contrib-python>=4.13.0 and numpy<2.0, we
+#9 0.491       can conclude that your requirements are unsatisfiable.
+#9 ERROR: process "/bin/sh -c if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi" did not complete successfully: exit code: 1
+------
+ > [stage-0  5/22] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi:
+0.491   × No solution found when resolving dependencies:
+0.491   ╰─▶ Because only the following versions of opencv-contrib-python are
+0.491       available:
+0.491           opencv-contrib-python<4.13.0
+0.491           opencv-contrib-python==4.13.0.90
+0.491           opencv-contrib-python==4.13.0.92
+0.491       and opencv-contrib-python>=4.13.0.90 depends on numpy>=2, we can
+0.491       conclude that opencv-contrib-python>=4.13.0 depends on numpy>=2.
+0.491       And because you require opencv-contrib-python>=4.13.0 and numpy<2.0, we
+0.491       can conclude that your requirements are unsatisfiable.
+------
+Dockerfile.comfyui:15
+--------------------
+  14 |     COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+  15 | >>> RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+  16 | >>>     if [ -s /tmp/special_logic_requirements.txt ]; then \
+  17 | >>>         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt && \
+  18 | >>>         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt; \
+  19 | >>>     fi
+  20 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi" did not complete successfully: exit code: 1
