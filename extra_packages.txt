@@ -108,3 +108,10 @@ polygraphy
 tensorrt
 lpips
 oidn>=0.2
+
+#ltx2
+decord
+#Warning: GroundingDINO not available. Text prompts will use fallback method.
+#git+https://github.com/IDEA-Research/GroundingDINO.git
+
+pycocotools

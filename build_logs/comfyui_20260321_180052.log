@@ -1,0 +1,649 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 5.74kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0  1/18] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.76kB done
+#5 DONE 0.0s
+
+#6 [stage-0  2/18] WORKDIR /default-comfyui-bundle
+#6 CACHED
+
+#7 [stage-0  3/18] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#7 CACHED
+
+#8 [stage-0  4/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#8 CACHED
+
+#9 [stage-0  5/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#9 0.153 Using Python 3.12.3 environment at: /venv
+#9 0.177 Resolved 86 packages in 20ms
+#9 0.260 Uninstalled 2 packages in 81ms
+#9 0.263 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+#9 0.263          If the cache and target directories are on different filesystems, hardlinking may not be supported.
+#9 0.263          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+#9 2.404 Installed 32 packages in 2.14s
+#9 2.404  + bchlib==2.1.3
+#9 2.404  + bitmath==1.3.3.1
+#9 2.404  + bracex==2.6
+#9 2.404  + cachetools==7.0.5
+#9 2.404  + chardet==4.0.0
+#9 2.404  + cuda-bindings==13.2.0
+#9 2.404  + cuda-pathfinder==1.4.3
+#9 2.404  + cuda-python==13.2.0
+#9 2.404  + deprecation==2.1.0
+#9 2.404  + dghs-imgutils==0.19.0
+#9 2.404  - diffusers==0.36.0
+#9 2.404  + diffusers==0.30.0
+#9 2.404  + emoji==2.11.1
+#9 2.404  + flatbuffers==25.12.19
+#9 2.404  + hbutils==0.14.2
+#9 2.404  + hfutils==0.13.0
+#9 2.404  + natsort==8.4.0
+#9 2.404  + onnxruntime-gpu==1.24.4
+#9 2.404  + opencv-contrib-python==4.11.0.86
+#9 2.404  + piexif==1.1.3
+#9 2.404  + pilmoji==2.0.4
+#9 2.405  + pyclipper==1.4.0
+#9 2.405  - pyparsing==3.3.1
+#9 2.405  + pyparsing==3.0.9
+#9 2.405  + pyrfc6266==1.0.2
+#9 2.405  + pytimeparse==1.1.8
+#9 2.405  + random-user-agent==1.0.1
+#9 2.405  + shapely==2.1.2
+#9 2.405  + tensorrt-cu13==10.16.0.72
+#9 2.405  + tensorrt-cu13-bindings==10.16.0.72
+#9 2.405  + tensorrt-cu13-libs==10.16.0.72
+#9 2.405  + tzlocal==5.3.1
+#9 2.405  + urlobject==3.0.0
+#9 2.405  + wcmatch==10.1
+#9 DONE 27.5s
+
+#10 [stage-0  6/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#10 DONE 0.0s
+
+#11 [stage-0  7/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#11 0.224 Using Python 3.12.3 environment at: /venv
+#11 0.235 Audited 8 packages in 11ms
+#11 DONE 0.3s
+
+#12 [stage-0  8/18] COPY extra_packages.txt /tmp/extra_packages.txt
+#12 DONE 0.1s
+
+#13 [stage-0  9/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+#13 0.687 Requirement already satisfied: setuptools in /venv/lib/python3.12/site-packages (80.9.0)
+#13 1.190 Collecting Cython
+#13 1.191   Using cached cython-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (7.5 kB)
+#13 1.222 Using cached cython-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.4 MB)
+#13 2.411 Installing collected packages: Cython
+#13 3.206 Successfully installed Cython-3.2.4
+#13 3.331 Using Python 3.12.3 environment at: /venv
+#13 3.929    Updating https://github.com/IDEA-Research/GroundingDINO.git (HEAD)
+#13 27.96     Updated https://github.com/IDEA-Research/GroundingDINO.git (856dde20aee659246248e20734ef9ba5214f5e44)
+#13 30.81 Resolved 417 packages in 27.47s
+#13 30.88 Uninstalled 5 packages in 51ms
+#13 30.88 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+#13 30.88          If the cache and target directories are on different filesystems, hardlinking may not be supported.
+#13 30.88          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+#13 32.25 Installed 306 packages in 1.36s
+#13 32.25    Building groundingdino @ git+https://github.com/IDEA-Research/GroundingDINO.git@856dde20aee659246248e20734ef9ba5214f5e44
+#13 32.29 Downloading decord (13.0MiB)
+#13 33.05  Downloaded decord
+#13 56.51   × Failed to build `groundingdino @
+#13 56.51   │ git+https://github.com/IDEA-Research/GroundingDINO.git@856dde20aee659246248e20734ef9ba5214f5e44`
+#13 56.51   ├─▶ The build backend returned an error
+#13 56.51   ╰─▶ Call to `setuptools.build_meta:__legacy__.build_wheel` failed (exit
+#13 56.51       status: 1)
+#13 56.51 
+#13 56.51       [stdout]
+#13 56.51       Building wheel groundingdino-0.1.0
+#13 56.51       Compiling with CUDA
+#13 56.51       running bdist_wheel
+#13 56.51       running build
+#13 56.51       running build_py
+#13 56.51       creating build/lib.linux-x86_64-cpython-312/groundingdino
+#13 56.51       copying groundingdino/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino
+#13 56.51       copying groundingdino/version.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino
+#13 56.51       creating build/lib.linux-x86_64-cpython-312/groundingdino/config
+#13 56.51       copying groundingdino/config/GroundingDINO_SwinB_cfg.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/config
+#13 56.51       copying groundingdino/config/GroundingDINO_SwinT_OGC.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/config
+#13 56.51       copying groundingdino/config/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/config
+#13 56.51       creating build/lib.linux-x86_64-cpython-312/groundingdino/datasets
+#13 56.51       copying groundingdino/datasets/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/datasets
+#13 56.51       copying groundingdino/datasets/cocogrounding_eval.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/datasets
+#13 56.51       copying groundingdino/datasets/transforms.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/datasets
+#13 56.51       creating build/lib.linux-x86_64-cpython-312/groundingdino/models
+#13 56.51       copying groundingdino/models/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models
+#13 56.51       copying groundingdino/models/registry.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models
+#13 56.51       creating build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/box_ops.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/get_tokenlizer.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/inference.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/logger.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/misc.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/slconfig.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/slio.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/time_counter.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/utils.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/visualizer.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       copying groundingdino/util/vl_utils.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/util
+#13 56.51       creating
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/bertwarper.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/fuse_modules.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/groundingdino.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/ms_deform_attn.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/transformer.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/transformer_vanilla.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       copying groundingdino/models/GroundingDINO/utils.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO
+#13 56.51       creating
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO/backbone
+#13 56.51       copying groundingdino/models/GroundingDINO/backbone/__init__.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO/backbone
+#13 56.51       copying groundingdino/models/GroundingDINO/backbone/backbone.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO/backbone
+#13 56.51       copying
+#13 56.51       groundingdino/models/GroundingDINO/backbone/position_encoding.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO/backbone
+#13 56.51       copying groundingdino/models/GroundingDINO/backbone/swin_transformer.py ->
+#13 56.51       build/lib.linux-x86_64-cpython-312/groundingdino/models/GroundingDINO/backbone
+#13 56.51       running build_ext
+#13 56.51       building 'groundingdino._C' extension
+#13 56.51       creating
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn
+#13 56.51       [1/4] /usr/local/cuda/bin/nvcc
+#13 56.51       --generate-dependencies-with-compile --dependency-output
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/cuda_version.o.d
+#13 56.51       -DWITH_CUDA
+#13 56.51       -I/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/TH
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/THC
+#13 56.51       -I/usr/local/cuda/include -I/venv/include -I/usr/include/python3.12 -c -c
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/cuda_version.cu
+#13 56.51       -o
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/cuda_version.o
+#13 56.51       -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__
+#13 56.51       -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"''
+#13 56.51       -DCUDA_HAS_FP16=1 -D__CUDA_NO_HALF_OPERATORS__
+#13 56.51       -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"'
+#13 56.51       '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"'
+#13 56.51       -DTORCH_EXTENSION_NAME=_C -D_GLIBCXX_USE_CXX11_ABI=1
+#13 56.51       -gencode=arch=compute_50,code=sm_50 -std=c++17
+#13 56.51       [2/4] /usr/local/cuda/bin/nvcc
+#13 56.51       --generate-dependencies-with-compile --dependency-output
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.o.d
+#13 56.51       -DWITH_CUDA
+#13 56.51       -I/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/TH
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/THC
+#13 56.51       -I/usr/local/cuda/include -I/venv/include -I/usr/include/python3.12 -c -c
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu
+#13 56.51       -o
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.o
+#13 56.51       -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__
+#13 56.51       -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"''
+#13 56.51       -DCUDA_HAS_FP16=1 -D__CUDA_NO_HALF_OPERATORS__
+#13 56.51       -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"'
+#13 56.51       '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"'
+#13 56.51       -DTORCH_EXTENSION_NAME=_C -D_GLIBCXX_USE_CXX11_ABI=1
+#13 56.51       -gencode=arch=compute_50,code=sm_50 -std=c++17
+#13 56.51       FAILED: [code=2]
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.o
+#13 56.51       /usr/local/cuda/bin/nvcc
+#13 56.51       --generate-dependencies-with-compile --dependency-output
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.o.d
+#13 56.51       -DWITH_CUDA
+#13 56.51       -I/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/TH
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/THC
+#13 56.51       -I/usr/local/cuda/include -I/venv/include -I/usr/include/python3.12 -c -c
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu
+#13 56.51       -o
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.o
+#13 56.51       -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__
+#13 56.51       -D__CUDA_NO_BFLOAT16_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       --expt-relaxed-constexpr --compiler-options ''"'"'-fPIC'"'"''
+#13 56.51       -DCUDA_HAS_FP16=1 -D__CUDA_NO_HALF_OPERATORS__
+#13 56.51       -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__
+#13 56.51       -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"'
+#13 56.51       '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"'
+#13 56.51       -DTORCH_EXTENSION_NAME=_C -D_GLIBCXX_USE_CXX11_ABI=1
+#13 56.51       -gencode=arch=compute_50,code=sm_50 -std=c++17
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu(65):
+#13 56.51       error: no suitable conversion function from "const
+#13 56.51       at::DeprecatedTypeProperties" to "c10::ScalarType" exists
+#13 56.51                 [&] { const auto& the_type = value.type(); constexpr
+#13 56.51       const char* at_dispatch_name = "ms_deform_attn_forward_cuda";
+#13 56.51       at::ScalarType _st = ::detail::scalar_type(the_type);
+#13 56.51       ; switch (_st) { case at::ScalarType::Double: { do
+#13 56.51       { if constexpr (!at::should_include_kernel_dtype(
+#13 56.51       at_dispatch_name, at::ScalarType::Double)) { if
+#13 56.51       (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(65), (::c10::detail::torchCheckMsgImpl(
+#13 56.51       "Expected " "false" " to be true, but got false.  " "(Could this
+#13 56.51       error message be improved?  If so, " "please report an enhancement
+#13 56.51       request to PyTorch.)", "dtype '", toString(at::ScalarType::Double),
+#13 56.51       "' not selected for kernel tag ", at_dispatch_name)));
+#13 56.51       }; } } while (0); using scalar_t [[maybe_unused]] =
+#13 56.51       c10::impl::ScalarTypeToCPPTypeT<at::ScalarType::Double>; return
+#13 56.51       ([&] { ms_deformable_im2col_cuda(at::cuda::getCurrentCUDAStream(),
+#13 56.51       value.data<scalar_t>() + n * im2col_step_ * per_value_size,
+#13 56.51       spatial_shapes.data<int64_t>(), level_start_index.data<int64_t>(),
+#13 56.51       sampling_loc.data<scalar_t>() + n * im2col_step_ *
+#13 56.51       per_sample_loc_size, attn_weight.data<scalar_t>() + n *
+#13 56.51       im2col_step_ * per_attn_weight_size, batch_n, spatial_size,
+#13 56.51       num_heads, channels, num_levels, num_query, num_point,
+#13 56.51       columns.data<scalar_t>()); })(); } case at::ScalarType::Float:
+#13 56.51       { do { if constexpr (!at::should_include_kernel_dtype(
+#13 56.51       at_dispatch_name, at::ScalarType::Float)) { if
+#13 56.51       (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(65), (::c10::detail::torchCheckMsgImpl(
+#13 56.51       "Expected " "false" " to be true, but got false.  " "(Could this
+#13 56.51       error message be improved?  If so, " "please report an enhancement
+#13 56.51       request to PyTorch.)", "dtype '", toString(at::ScalarType::Float),
+#13 56.51       "' not selected for kernel tag ", at_dispatch_name)));
+#13 56.51       }; } } while (0); using scalar_t [[maybe_unused]] =
+#13 56.51       c10::impl::ScalarTypeToCPPTypeT<at::ScalarType::Float>; return
+#13 56.51       ([&] { ms_deformable_im2col_cuda(at::cuda::getCurrentCUDAStream(),
+#13 56.51       value.data<scalar_t>() + n * im2col_step_ * per_value_size,
+#13 56.51       spatial_shapes.data<int64_t>(), level_start_index.data<int64_t>(),
+#13 56.51       sampling_loc.data<scalar_t>() + n * im2col_step_ *
+#13 56.51       per_sample_loc_size, attn_weight.data<scalar_t>() + n * im2col_step_
+#13 56.51       * per_attn_weight_size, batch_n, spatial_size, num_heads, channels,
+#13 56.51       num_levels, num_query, num_point, columns.data<scalar_t>()); })();
+#13 56.51       } default: if (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(65), (::c10::detail::torchCheckMsgImpl( "Expected
+#13 56.51       " "false" " to be true, but got false.  " "(Could this error message be
+#13 56.51       improved?  If so, " "please report an enhancement request to PyTorch.)",
+#13 56.51       '"', at_dispatch_name, "\" not implemented for '", toString(_st),
+#13 56.51       "'"))); }; } }()
+#13 56.51       
+#13 56.51       ^
+#13 56.51 
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu(135):
+#13 56.51       error: no suitable conversion function from "const
+#13 56.51       at::DeprecatedTypeProperties" to "c10::ScalarType" exists
+#13 56.51                 [&] { const auto& the_type = value.type(); constexpr
+#13 56.51       const char* at_dispatch_name = "ms_deform_attn_backward_cuda";
+#13 56.51       at::ScalarType _st = ::detail::scalar_type(the_type);
+#13 56.51       ; switch (_st) { case at::ScalarType::Double: { do
+#13 56.51       { if constexpr (!at::should_include_kernel_dtype(
+#13 56.51       at_dispatch_name, at::ScalarType::Double)) { if
+#13 56.51       (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(135), (::c10::detail::torchCheckMsgImpl(
+#13 56.51       "Expected " "false" " to be true, but got false.  " "(Could this
+#13 56.51       error message be improved?  If so, " "please report an enhancement
+#13 56.51       request to PyTorch.)", "dtype '", toString(at::ScalarType::Double),
+#13 56.51       "' not selected for kernel tag ", at_dispatch_name)));
+#13 56.51       }; } } while (0); using scalar_t [[maybe_unused]] =
+#13 56.51       c10::impl::ScalarTypeToCPPTypeT<at::ScalarType::Double>; return
+#13 56.51       ([&] { ms_deformable_col2im_cuda(at::cuda::getCurrentCUDAStream(),
+#13 56.51       grad_output_g.data<scalar_t>(), value.data<scalar_t>() + n *
+#13 56.51       im2col_step_ * per_value_size, spatial_shapes.data<int64_t>(),
+#13 56.51       level_start_index.data<int64_t>(), sampling_loc.data<scalar_t>() + n *
+#13 56.51       im2col_step_ * per_sample_loc_size, attn_weight.data<scalar_t>() + n *
+#13 56.51       im2col_step_ * per_attn_weight_size, batch_n, spatial_size, num_heads,
+#13 56.51       channels, num_levels, num_query, num_point, grad_value.data<scalar_t>()
+#13 56.51       + n * im2col_step_ * per_value_size, grad_sampling_loc.data<scalar_t>()
+#13 56.51       + n * im2col_step_ * per_sample_loc_size,
+#13 56.51       grad_attn_weight.data<scalar_t>() + n * im2col_step_ *
+#13 56.51       per_attn_weight_size); })(); } case at::ScalarType::Float:
+#13 56.51       { do { if constexpr (!at::should_include_kernel_dtype(
+#13 56.51       at_dispatch_name, at::ScalarType::Float)) { if
+#13 56.51       (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(135), (::c10::detail::torchCheckMsgImpl(
+#13 56.51       "Expected " "false" " to be true, but got false.  " "(Could this
+#13 56.51       error message be improved?  If so, " "please report an enhancement
+#13 56.51       request to PyTorch.)", "dtype '", toString(at::ScalarType::Float),
+#13 56.51       "' not selected for kernel tag ", at_dispatch_name)));
+#13 56.51       }; } } while (0); using scalar_t [[maybe_unused]] =
+#13 56.51       c10::impl::ScalarTypeToCPPTypeT<at::ScalarType::Float>; return
+#13 56.51       ([&] { ms_deformable_col2im_cuda(at::cuda::getCurrentCUDAStream(),
+#13 56.51       grad_output_g.data<scalar_t>(), value.data<scalar_t>() + n *
+#13 56.51       im2col_step_ * per_value_size, spatial_shapes.data<int64_t>(),
+#13 56.51       level_start_index.data<int64_t>(), sampling_loc.data<scalar_t>() +
+#13 56.51       n * im2col_step_ * per_sample_loc_size, attn_weight.data<scalar_t>()
+#13 56.51       + n * im2col_step_ * per_attn_weight_size, batch_n, spatial_size,
+#13 56.51       num_heads, channels, num_levels, num_query, num_point,
+#13 56.51       grad_value.data<scalar_t>() + n * im2col_step_ * per_value_size,
+#13 56.51       grad_sampling_loc.data<scalar_t>() + n * im2col_step_ *
+#13 56.51       per_sample_loc_size, grad_attn_weight.data<scalar_t>() +
+#13 56.51       n * im2col_step_ * per_attn_weight_size); })(); } default:
+#13 56.51       if (!(false)) { ::c10::detail::torchCheckFail( __func__,
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu",
+#13 56.51       static_cast<uint32_t>(135), (::c10::detail::torchCheckMsgImpl( "Expected
+#13 56.51       " "false" " to be true, but got false.  " "(Could this error message be
+#13 56.51       improved?  If so, " "please report an enhancement request to PyTorch.)",
+#13 56.51       '"', at_dispatch_name, "\" not implemented for '", toString(_st),
+#13 56.51       "'"))); }; } }()
+#13 56.51       
+#13 56.51       ^
+#13 56.51 
+#13 56.51       2 errors detected in the compilation of
+#13 56.51       "/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu".
+#13 56.51       [3/4] c++ -MMD -MF
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cpu.o.d
+#13 56.51       -fno-strict-overflow -Wsign-compare
+#13 56.51       -DNDEBUG -g -O2 -Wall -fPIC -DWITH_CUDA
+#13 56.51       -I/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/TH
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/THC
+#13 56.51       -I/usr/local/cuda/include -I/venv/include -I/usr/include/python3.12 -c -c
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cpu.cpp
+#13 56.51       -o
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cpu.o
+#13 56.51       -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"'
+#13 56.51       '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"'
+#13 56.51       -DTORCH_EXTENSION_NAME=_C -D_GLIBCXX_USE_CXX11_ABI=1 -std=c++17
+#13 56.51       [4/4] c++ -MMD -MF
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/vision.o.d
+#13 56.51       -fno-strict-overflow -Wsign-compare
+#13 56.51       -DNDEBUG -g -O2 -Wall -fPIC -DWITH_CUDA
+#13 56.51       -I/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/TH
+#13 56.51       -I/venv/lib/python3.12/site-packages/torch/include/THC
+#13 56.51       -I/usr/local/cuda/include -I/venv/include -I/usr/include/python3.12 -c -c
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/vision.cpp
+#13 56.51       -o
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/vision.o
+#13 56.51       -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"'
+#13 56.51       '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1016"'
+#13 56.51       -DTORCH_EXTENSION_NAME=_C -D_GLIBCXX_USE_CXX11_ABI=1 -std=c++17
+#13 56.51       In file included from
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/vision.cpp:3:
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn.h:
+#13 56.51       In function ‘at::Tensor groundingdino::ms_deform_attn_forward(const
+#13 56.51       at::Tensor&, const at::Tensor&, const at::Tensor&, const at::Tensor&,
+#13 56.51       const at::Tensor&, int)’:
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn.h:30:19:
+#13 56.51       warning: ‘at::DeprecatedTypeProperties& at::Tensor::type() const’ is
+#13 56.51       deprecated: Tensor.type() is deprecated. Instead use Tensor.options(),
+#13 56.51       which in many cases (e.g. in a constructor) is a drop-in replacement.
+#13 56.51       If you were using data from type(), that is now available from
+#13 56.51       Tensor itself, so instead of tensor.type().scalar_type(), use
+#13 56.51       tensor.scalar_type() instead and instead of tensor.type().backend() use
+#13 56.51       tensor.device(). [-Wdeprecated-declarations]
+#13 56.51          30 |     if (value.type().is_cuda())
+#13 56.51             |         ~~~~~~~~~~^~
+#13 56.51       In file included from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/ATen/core/Tensor.h:3,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/ATen/Tensor.h:3,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/autograd/function_hook.h:3,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/autograd/cpp_hook.h:2,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/autograd/variable.h:6,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/autograd/autograd.h:3,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include/torch/autograd.h:3,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/csrc/api/include/torch/all.h:7,
+#13 56.51                        from
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/torch/extension.h:5,
+#13 56.51                        from
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cpu.h:12,
+#13 56.51                        from
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn.h:13:
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/ATen/core/TensorBody.h:225:30:
+#13 56.51       note: declared here
+#13 56.51         225 |   DeprecatedTypeProperties & type() const {
+#13 56.51             |                              ^~~~
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn.h:
+#13 56.51       In function ‘std::vector<at::Tensor>
+#13 56.51       groundingdino::ms_deform_attn_backward(const at::Tensor&, const
+#13 56.51       at::Tensor&, const at::Tensor&, const at::Tensor&, const at::Tensor&,
+#13 56.51       const at::Tensor&, int)’:
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn.h:52:19:
+#13 56.51       warning: ‘at::DeprecatedTypeProperties& at::Tensor::type() const’ is
+#13 56.51       deprecated: Tensor.type() is deprecated. Instead use Tensor.options(),
+#13 56.51       which in many cases (e.g. in a constructor) is a drop-in replacement.
+#13 56.51       If you were using data from type(), that is now available from
+#13 56.51       Tensor itself, so instead of tensor.type().scalar_type(), use
+#13 56.51       tensor.scalar_type() instead and instead of tensor.type().backend() use
+#13 56.51       tensor.device(). [-Wdeprecated-declarations]
+#13 56.51          52 |     if (value.type().is_cuda())
+#13 56.51             |         ~~~~~~~~~~^~
+#13 56.51       /venv/lib/python3.12/site-packages/torch/include/ATen/core/TensorBody.h:225:30:
+#13 56.51       note: declared here
+#13 56.51         225 |   DeprecatedTypeProperties & type() const {
+#13 56.51             |                              ^~~~
+#13 56.51       ninja: build stopped: subcommand failed.
+#13 56.51 
+#13 56.51       [stderr]
+#13 56.51       /venv/lib/python3.12/site-packages/torch/cuda/__init__.py:61:
+#13 56.51       FutureWarning: The pynvml package is deprecated. Please install
+#13 56.51       nvidia-ml-py instead. If you did not install pynvml directly, please
+#13 56.51       report this to the maintainers of the package that installed pynvml
+#13 56.51       for you.
+#13 56.51         import pynvml  # type: ignore[import]
+#13 56.51       No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+#13 56.51       /venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py:458:
+#13 56.51       UserWarning: There are no x86_64-linux-gnu-g++ version bounds defined
+#13 56.51       for CUDA version 12.6
+#13 56.51         warnings.warn(f'There are no {compiler_name} version bounds defined
+#13 56.51       for CUDA version {cuda_str_version}')
+#13 56.51       Emitting ninja build file
+#13 56.51       /pip-cache/git-v0/checkouts/20e57dfb795c32c4/856dde2/build/temp.linux-x86_64-cpython-312/build.ninja...
+#13 56.51       Compiling objects...
+#13 56.51       Allowing ninja to set a default number of workers... (overridable by
+#13 56.51       setting the environment variable MAX_JOBS=N)
+#13 56.51       Traceback (most recent call last):
+#13 56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+#13 56.51       line 2209, in _run_ninja_build
+#13 56.51           subprocess.run(
+#13 56.51         File "/usr/lib/python3.12/subprocess.py", line 571, in run
+#13 56.51           raise CalledProcessError(retcode, process.args,
+#13 56.51       subprocess.CalledProcessError: Command '['ninja', '-v']' returned
+#13 56.51       non-zero exit status 2.
+#13 56.51 
+#13 56.51       The above exception was the direct cause of the following exception:
+#13 56.51 
+#13 56.51       Traceback (most recent call last):
+#13 56.51         File "<string>", line 11, in <module>
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/build_meta.py",
+#13 56.51       line 435, in build_wheel
+#13 56.51           return _build(['bdist_wheel', '--dist-info-dir',
+#13 56.51       str(metadata_directory)])
+#13 56.51       
+#13 56.51       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/build_meta.py",
+#13 56.51       line 423, in _build
+#13 56.51           return self._build_with_temp_dir(
+#13 56.51                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/build_meta.py",
+#13 56.51       line 404, in _build_with_temp_dir
+#13 56.51           self.run_setup()
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/build_meta.py",
+#13 56.51       line 512, in run_setup
+#13 56.51           super().run_setup(setup_script=setup_script)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/build_meta.py",
+#13 56.51       line 317, in run_setup
+#13 56.51           exec(code, locals())
+#13 56.51         File "<string>", line 204, in <module>
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/__init__.py", line
+#13 56.51       115, in setup
+#13 56.51           return distutils.core.setup(**attrs)
+#13 56.51                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/core.py",
+#13 56.51       line 186, in setup
+#13 56.51           return run_commands(dist)
+#13 56.51                  ^^^^^^^^^^^^^^^^^^
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/core.py",
+#13 56.51       line 202, in run_commands
+#13 56.51           dist.run_commands()
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/dist.py",
+#13 56.51       line 1002, in run_commands
+#13 56.51           self.run_command(cmd)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/dist.py", line
+#13 56.51       1102, in run_command
+#13 56.51           super().run_command(command)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/dist.py",
+#13 56.51       line 1021, in run_command
+#13 56.51           cmd_obj.run()
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/command/bdist_wheel.py",
+#13 56.51       line 370, in run
+#13 56.51           self.run_command("build")
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/cmd.py",
+#13 56.51       line 357, in run_command
+#13 56.51           self.distribution.run_command(command)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/dist.py", line
+#13 56.51       1102, in run_command
+#13 56.51           super().run_command(command)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/dist.py",
+#13 56.51       line 1021, in run_command
+#13 56.51           cmd_obj.run()
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/_distutils/command/build.py",
+#13 56.51       line 135, in run
+#13 56.51           self.run_command(cmd_name)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/cmd.py",
+#13 56.51       line 357, in run_command
+#13 56.51           self.distribution.run_command(command)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/dist.py", line
+#13 56.51       1102, in run_command
+#13 56.51           super().run_command(command)
+#13 56.51         File "/venv/lib/python3.12/site-packages/setuptools/_distutils/dist.py",
+#13 56.51       line 1021, in run_command
+#13 56.51           cmd_obj.run()
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/command/build_ext.py",
+#13 56.51       line 96, in run
+#13 56.51           _build_ext.run(self)
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/_distutils/command/build_ext.py",
+#13 56.51       line 368, in run
+#13 56.51           self.build_extensions()
+#13 56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+#13 56.51       line 900, in build_extensions
+#13 56.51           build_ext.build_extensions(self)
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/_distutils/command/build_ext.py",
+#13 56.51       line 484, in build_extensions
+#13 56.51           self._build_extensions_serial()
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/_distutils/command/build_ext.py",
+#13 56.51       line 510, in _build_extensions_serial
+#13 56.51           self.build_extension(ext)
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/command/build_ext.py",
+#13 56.51       line 261, in build_extension
+#13 56.51           _build_ext.build_extension(self, ext)
+#13 56.51         File "/venv/lib/python3.12/site-packages/Cython/Distutils/build_ext.py",
+#13 56.51       line 136, in build_extension
+#13 56.51           super().build_extension(ext)
+#13 56.51         File
+#13 56.51       "/venv/lib/python3.12/site-packages/setuptools/_distutils/command/build_ext.py",
+#13 56.51       line 565, in build_extension
+#13 56.51           objects = self.compiler.compile(
+#13 56.51                     ^^^^^^^^^^^^^^^^^^^^^^
+#13 56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+#13 56.51       line 713, in unix_wrap_ninja_compile
+#13 56.51           _write_ninja_file_and_compile_objects(
+#13 56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+#13 56.51       line 1869, in _write_ninja_file_and_compile_objects
+#13 56.51           _run_ninja_build(
+#13 56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+#13 56.51       line 2225, in _run_ninja_build
+#13 56.51           raise RuntimeError(message) from e
+#13 56.51       RuntimeError: Error compiling objects for extension
+#13 56.51 
+#13 56.51       hint: This usually indicates a problem with the package or the build
+#13 56.51       environment.
+#13 ERROR: process "/bin/sh -c /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt" did not complete successfully: exit code: 1
+------
+ > [stage-0  9/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt:
+56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+56.51       line 1869, in _write_ninja_file_and_compile_objects
+56.51           _run_ninja_build(
+56.51         File "/venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py",
+56.51       line 2225, in _run_ninja_build
+56.51           raise RuntimeError(message) from e
+56.51       RuntimeError: Error compiling objects for extension
+56.51 
+56.51       hint: This usually indicates a problem with the package or the build
+56.51       environment.
+------
+Dockerfile.comfyui:32
+--------------------
+  31 |     COPY extra_packages.txt /tmp/extra_packages.txt
+  32 | >>> RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+  33 | >>>     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython && \
+  34 | >>>     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt && \
+  35 | >>>     if [ -f ComfyUI-Manager/requirements.txt ]; then \
+  36 | >>>         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt; \
+  37 | >>>     fi && \
+  38 | >>>     if [ -s /tmp/extra_packages.txt ]; then \
+  39 | >>>         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt; \
+  40 | >>>     fi && \
+  41 | >>>     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt && \
+  42 | >>>     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+  43 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt" did not complete successfully: exit code: 1

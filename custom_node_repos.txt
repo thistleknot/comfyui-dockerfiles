@@ -32,7 +32,7 @@ nosiu/comfyui-instantId-faceswap
 # SamKhoze/ComfyUI-DeepFuze
 SparknightLLC/ComfyUI-GPENO
 ## Inference Optimization & Performance
-Zehong-Ma/ComfyUI-MagCache
+#Zehong-Ma/ComfyUI-MagCache
 willblaschko/ComfyUI-Unload-Models
 mcmonkeyprojects/sd-dynamic-thresholding
 ## LLM & Vision Models
@@ -111,3 +111,5 @@ Anze-/ComfyUI-OIDN
 BigStationW/ComfyUi-Scale-Image-to-Total-Pixels-Advanced
 1038lab/ComfyUI-RMBG
 CY-CHENYUE/ComfyUI-InpaintEasy
+evanspearman/ComfyMath
+TTPlanetPig/Comfyui_TTP_Toolset

@@ -1,0 +1,308 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.custom_nodes
+#1 transferring dockerfile: 7.79kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ml-base:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 4.05kB done
+#4 DONE 0.0s
+
+#5 [stage-0 1/7] FROM docker.io/library/ml-base:cu126-pt26
+#5 CACHED
+
+#6 [stage-0 2/7] COPY custom_node_repos.txt /tmp/custom_node_repos.txt
+#6 DONE 0.0s
+
+#7 [stage-0 3/7] COPY special_custom_nodes.txt /tmp/special_custom_nodes.txt
+#7 DONE 0.0s
+
+#8 [stage-0 4/7] RUN cat > /tmp/custom_node_special_pulls.txt << 'EOF'
+#8 DONE 0.2s
+
+#9 [stage-0 5/7] RUN --mount=type=cache,target=/pip-cache,id=pip-external     mkdir -p /tmp/requirements &&     echo "=== Fetching requirements.txt from custom node repos ===" &&     while IFS= read -r repo || [ -n "$repo" ]; do         [ -z "$repo" ] && continue;         case "$repo" in #*) continue ;; esac;         node_name=$(basename "$repo");         if curl -fsSL --retry 3 --retry-delay 2             "https://raw.githubusercontent.com/${repo}/main/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${repo} (main)";         elif curl -fsSL --retry 3 --retry-delay 2             "https://raw.githubusercontent.com/${repo}/master/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${repo} (master)";         else             echo "? ${repo} (no requirements.txt)";         fi;     done < /tmp/custom_node_repos.txt &&     echo "=== Fetching requirements.txt from special custom nodes ===" &&     while IFS= read -r git_url || [ -n "$git_url" ]; do         [ -z "$git_url" ] && continue;         case "$git_url" in #*) continue ;; esac;         node_name=$(basename "$git_url" .git);         raw_url=$(echo "$git_url" | sed -e 's|github.com/|raw.githubusercontent.com/|' -e 's|\.git$||');         if curl -fsSL --retry 3 --retry-delay 2             "${raw_url}/main/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${git_url} (main)";         elif curl -fsSL --retry 3 --retry-delay 2             "${raw_url}/master/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${git_url} (master)";         else             echo "? ${git_url} (no requirements.txt)";         fi;     done < /tmp/special_custom_nodes.txt &&     echo "=== Merging requirements ===" &&     cat /tmp/requirements/*.txt 2>/dev/null |     grep -v '^#' | grep -v '^$' | grep -v '^-' | sed 's/#.*//' | sed 's/[[:space:]]*$//' |     sort | uniq > /tmp/all_requirements.txt &&     echo "=== Combined $(wc -l < /tmp/all_requirements.txt) unique package requirements ===" &&     if [ -s /tmp/all_requirements.txt ]; then         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/all_requirements.txt ||         (while IFS= read -r pkg; do              /venv/bin/uv pip install "$pkg" ||              /venv/bin/uv pip install "${pkg%%[>=<~!]*}";          done < /tmp/all_requirements.txt);     fi
+#9 0.170 === Fetching requirements.txt from custom node repos ===
+#9 0.172 ? chrisgoringe/cg-use-everywhere (no requirements.txt)
+#9 0.173 ? pythongosssss/ComfyUI-Custom-Scripts (no requirements.txt)
+#9 0.173 ? rgthree/rgthree-comfy (no requirements.txt)
+#9 0.174 ? yolain/ComfyUI-Easy-Use (no requirements.txt)
+#9 0.175 ? city96/ComfyUI-GGUF (no requirements.txt)
+#9 0.176 ? city96/ComfyUI_ExtraModels (no requirements.txt)
+#9 0.177 ? Fannovel16/comfyui_controlnet_aux (no requirements.txt)
+#9 0.178 ? Kosinkadink/ComfyUI-Advanced-ControlNet (no requirements.txt)
+#9 0.178 ? cubiq/ComfyUI_IPAdapter_plus (no requirements.txt)
+#9 0.179 ? Shakker-Labs/ComfyUI-IPAdapter-Flux (no requirements.txt)
+#9 0.180 ? cubiq/ComfyUI_InstantID (no requirements.txt)
+#9 0.181 ? Kosinkadink/ComfyUI-AnimateDiff-Evolved (no requirements.txt)
+#9 0.182 ? Kosinkadink/ComfyUI-VideoHelperSuite (no requirements.txt)
+#9 0.182 ? kijai/ComfyUI-WanVideoWrapper (no requirements.txt)
+#9 0.183 ? raindrop313/ComfyUI-WanVideoStartEndFrames (no requirements.txt)
+#9 0.184 ? MixLabPro/comfyui-liveportrait (no requirements.txt)
+#9 0.185 ? ltdrdata/ComfyUI-Impact-Pack (no requirements.txt)
+#9 0.186 ? ltdrdata/ComfyUI-Impact-Subpack (no requirements.txt)
+#9 0.187 ? ltdrdata/ComfyUI-Inspire-Pack (no requirements.txt)
+#9 0.187 ? ssitu/ComfyUI_UltimateSDUpscale (no requirements.txt)
+#9 0.188 ? traugdor/ComfyUI-UltimateSDUpscale-GGUF (no requirements.txt)
+#9 0.189 ? Gourieff/ComfyUI-ReActor (no requirements.txt)
+#9 0.190 ? nosiu/comfyui-instantId-faceswap (no requirements.txt)
+#9 0.191 ? SparknightLLC/ComfyUI-GPENO (no requirements.txt)
+#9 0.192 ? Zehong-Ma/ComfyUI-MagCache (no requirements.txt)
+#9 0.192 ? willblaschko/ComfyUI-Unload-Models (no requirements.txt)
+#9 0.193 ? mcmonkeyprojects/sd-dynamic-thresholding (no requirements.txt)
+#9 0.194 ? heshengtao/comfyui_LLM_party (no requirements.txt)
+#9 0.195 ? KLL535/ComfyUI_Simple_Qwen3-VL-gguf (no requirements.txt)
+#9 0.195 ? 1038lab/ComfyUI-QwenVL (no requirements.txt)
+#9 0.196 ? alexcong/ComfyUI_QwenVL (no requirements.txt)
+#9 0.197 ? chrisgoringe/cg-image-filter (no requirements.txt)
+#9 0.198 ? chrisgoringe/cg-image-picker (no requirements.txt)
+#9 0.198 ? giriss/comfy-image-saver (no requirements.txt)
+#9 0.199 ? cubiq/ComfyUI_essentials (no requirements.txt)
+#9 0.200 ? WASasquatch/was-node-suite-comfyui (no requirements.txt)
+#9 0.201 ? Suzie1/ComfyUI_Comfyroll_CustomNodes (no requirements.txt)
+#9 0.201 ? crystian/ComfyUI-Crystools (no requirements.txt)
+#9 0.202 ? kijai/ComfyUI-KJNodes (no requirements.txt)
+#9 0.203 ? Derfuu/Derfuu_ComfyUI_ModdedNodes (no requirements.txt)
+#9 0.204 ? fearnworks/ComfyUI_FearnworksNodes (no requirements.txt)
+#9 0.204 ? chflame163/ComfyUI_LayerStyle (no requirements.txt)
+#9 0.205 ? adieyal/comfyui-dynamicprompts (no requirements.txt)
+#9 0.206 ? AIrjen/OneButtonPrompt (no requirements.txt)
+#9 0.207 ? FizzleDorf/ComfyUI_FizzNodes (no requirements.txt)
+#9 0.207 ? yawiii/comfyui_prompt_assistant (no requirements.txt)
+#9 0.208 ? alt-key-project/comfyui-dream-project (no requirements.txt)
+#9 0.209 ? alt-key-project/comfyui-dream-video-batches (no requirements.txt)
+#9 0.210 ? storyicon/comfyui_segment_anything (no requirements.txt)
+#9 0.211 ? aria1th/ComfyUI-LogicUtils (no requirements.txt)
+#9 0.212 ? AIDC-AI/ComfyUI-Copilot (no requirements.txt)
+#9 0.213 ? ClownsharkBatwing/RES4LYF (no requirements.txt)
+#9 0.213 ? GACLove/ComfyUI-VFI (no requirements.txt)
+#9 0.214 ? ComfyUI-GIMM-VFI (no requirements.txt)
+#9 0.215 ? ComplexRobot/ComfyUI-Simple-VFI (no requirements.txt)
+#9 0.216 ? stduhpf/ComfyUI--Wan22FirstLastFrameToVideoLatent (no requirements.txt)
+#9 0.216 ? SparknightLLC/ComfyUI-LatentClamp (no requirements.txt)
+#9 0.217 ? Clybius/ComfyUI-Latent-Modifiers (no requirements.txt)
+#9 0.218 ? kuschanow/ComfyUI-Advanced-Latent-Control (no requirements.txt)
+#9 0.219 ? SeanScripts/ComfyUI-Unload-Model (no requirements.txt)
+#9 0.219 ? SparknightLLC/ComfyUI-GPENO (no requirements.txt)
+#9 0.220 ? kuschanow/ComfyUI-Advanced-Latent-Control (no requirements.txt)
+#9 0.221 ? PozzettiAndrea/ComfyUI-SAM3 (no requirements.txt)
+#9 0.221 ? tungdop2/Comfyui_face_restorer (no requirements.txt)
+#9 0.222 ? Lightricks/ComfyUI-LTXVideo (no requirements.txt)
+#9 0.223 ? numz/ComfyUI-SeedVR2_VideoUpscaler (no requirements.txt)
+#9 0.224 ? GACLove/ComfyUI-VFI (no requirements.txt)
+#9 0.224 ? silveroxides/ComfyUI_RIFE_TensorRT_Auto (no requirements.txt)
+#9 0.225 ? yuvraj108c/ComfyUI-Rife-Tensorrt (no requirements.txt)
+#9 0.226 ? ShmuelRonen/ComfyUI_wav2lip (no requirements.txt)
+#9 0.227 ? kijai/ComfyUI-MelBandRoFormer (no requirements.txt)
+#9 0.227 ? theUpsider/ComfyUI-Logic (no requirements.txt)
+#9 0.228 ? danTheMonk/comfyui-int-and-float (no requirements.txt)
+#9 0.229 ? mav-rik/facerestore_cf (no requirements.txt)
+#9 0.229 ? Fannovel16/ComfyUI-Frame-Interpolation (no requirements.txt)
+#9 0.230 ? benjamin-bertram/Comfyui_OIDN_Denoiser (no requirements.txt)
+#9 0.231 ? Anze-/ComfyUI-OIDN (no requirements.txt)
+#9 0.232 ? BigStationW/ComfyUi-Scale-Image-to-Total-Pixels-Advanced (no requirements.txt)
+#9 0.233 ? 1038lab/ComfyUI-RMBG (no requirements.txt)
+#9 0.233 ? CY-CHENYUE/ComfyUI-InpaintEasy (no requirements.txt)
+#9 0.234 ? evanspearman/ComfyMath (no requirements.txt)
+#9 0.235 ? TTPlanetPig/Comfyui_TTP_Toolset (no requirements.txt)
+#9 0.235 === Fetching requirements.txt from special custom nodes ===
+#9 0.237 ? https://codeberg.org/Gourieff/comfyui-reactor-node (no requirements.txt)
+#9 0.237 === Merging requirements ===
+#9 0.241 === Combined 0 unique package requirements ===
+#9 DONE 0.3s
+
+#10 [stage-0 6/7] RUN mkdir -p /custom_nodes_staged /install_logs &&     echo "=== Cloning Custom Nodes ===" | tee /install_logs/install.log &&     while IFS= read -r repo || [ -n "$repo" ]; do         [ -z "$repo" ] && continue;         case "$repo" in #*) continue ;; esac;         node_name=$(basename "$repo");         echo "Cloning: $repo" | tee -a /install_logs/install.log;         git clone --depth 1 https://github.com/${repo}.git /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log ||         echo "Failed: $repo" | tee -a /install_logs/failed_clones.txt;     done < /tmp/custom_node_repos.txt &&     echo "=== Cloning Special Custom Nodes ===" | tee -a /install_logs/install.log &&     while IFS= read -r git_url || [ -n "$git_url" ]; do         [ -z "$git_url" ] && continue;         case "$git_url" in #*) continue ;; esac;         node_name=$(basename "$git_url" .git);         echo "Cloning: $git_url -> $node_name" | tee -a /install_logs/install.log;         git clone --depth 1 "$git_url" /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log ||         echo "Failed: $git_url" | tee -a /install_logs/failed_clones.txt;     done < /tmp/special_custom_nodes.txt
+#10 0.195 === Cloning Custom Nodes ===
+#10 0.196 Cloning: chrisgoringe/cg-use-everywhere
+#10 0.197 Cloning into '/custom_nodes_staged/cg-use-everywhere'...
+#10 1.888 Cloning: pythongosssss/ComfyUI-Custom-Scripts
+#10 1.889 Cloning into '/custom_nodes_staged/ComfyUI-Custom-Scripts'...
+#10 2.683 Cloning: rgthree/rgthree-comfy
+#10 2.684 Cloning into '/custom_nodes_staged/rgthree-comfy'...
+#10 5.063 Cloning: yolain/ComfyUI-Easy-Use
+#10 5.064 Cloning into '/custom_nodes_staged/ComfyUI-Easy-Use'...
+#10 24.82 Cloning: city96/ComfyUI-GGUF
+#10 24.82 Cloning into '/custom_nodes_staged/ComfyUI-GGUF'...
+#10 26.04 Cloning: city96/ComfyUI_ExtraModels
+#10 26.04 Cloning into '/custom_nodes_staged/ComfyUI_ExtraModels'...
+#10 28.21 Cloning: Fannovel16/comfyui_controlnet_aux
+#10 28.21 Cloning into '/custom_nodes_staged/comfyui_controlnet_aux'...
+#10 37.97 Cloning: Kosinkadink/ComfyUI-Advanced-ControlNet
+#10 37.97 Cloning into '/custom_nodes_staged/ComfyUI-Advanced-ControlNet'...
+#10 39.20 Cloning: cubiq/ComfyUI_IPAdapter_plus
+#10 39.20 Cloning into '/custom_nodes_staged/ComfyUI_IPAdapter_plus'...
+#10 40.09 Cloning: Shakker-Labs/ComfyUI-IPAdapter-Flux
+#10 40.09 Cloning into '/custom_nodes_staged/ComfyUI-IPAdapter-Flux'...
+#10 42.22 Cloning: cubiq/ComfyUI_InstantID
+#10 42.23 Cloning into '/custom_nodes_staged/ComfyUI_InstantID'...
+#10 43.92 Cloning: Kosinkadink/ComfyUI-AnimateDiff-Evolved
+#10 43.92 Cloning into '/custom_nodes_staged/ComfyUI-AnimateDiff-Evolved'...
+#10 44.87 Cloning: Kosinkadink/ComfyUI-VideoHelperSuite
+#10 44.87 Cloning into '/custom_nodes_staged/ComfyUI-VideoHelperSuite'...
+#10 45.95 Cloning: kijai/ComfyUI-WanVideoWrapper
+#10 45.96 Cloning into '/custom_nodes_staged/ComfyUI-WanVideoWrapper'...
+#10 155.4 Cloning: raindrop313/ComfyUI-WanVideoStartEndFrames
+#10 155.4 Cloning into '/custom_nodes_staged/ComfyUI-WanVideoStartEndFrames'...
+#10 157.9 Cloning: MixLabPro/comfyui-liveportrait
+#10 157.9 Cloning into '/custom_nodes_staged/comfyui-liveportrait'...
+#10 217.1 Cloning: ltdrdata/ComfyUI-Impact-Pack
+#10 217.1 Cloning into '/custom_nodes_staged/ComfyUI-Impact-Pack'...
+#10 219.5 Cloning: ltdrdata/ComfyUI-Impact-Subpack
+#10 219.5 Cloning into '/custom_nodes_staged/ComfyUI-Impact-Subpack'...
+#10 220.3 Cloning: ltdrdata/ComfyUI-Inspire-Pack
+#10 220.3 Cloning into '/custom_nodes_staged/ComfyUI-Inspire-Pack'...
+#10 221.1 Cloning: ssitu/ComfyUI_UltimateSDUpscale
+#10 221.1 Cloning into '/custom_nodes_staged/ComfyUI_UltimateSDUpscale'...
+#10 222.6 Cloning: traugdor/ComfyUI-UltimateSDUpscale-GGUF
+#10 222.6 Cloning into '/custom_nodes_staged/ComfyUI-UltimateSDUpscale-GGUF'...
+#10 223.5 Cloning: Gourieff/ComfyUI-ReActor
+#10 223.5 Cloning into '/custom_nodes_staged/ComfyUI-ReActor'...
+#10 224.4 Cloning: nosiu/comfyui-instantId-faceswap
+#10 224.4 Cloning into '/custom_nodes_staged/comfyui-instantId-faceswap'...
+#10 225.2 Cloning: SparknightLLC/ComfyUI-GPENO
+#10 225.2 Cloning into '/custom_nodes_staged/ComfyUI-GPENO'...
+#10 226.3 Cloning: Zehong-Ma/ComfyUI-MagCache
+#10 226.3 Cloning into '/custom_nodes_staged/ComfyUI-MagCache'...
+#10 251.1 Cloning: willblaschko/ComfyUI-Unload-Models
+#10 251.1 Cloning into '/custom_nodes_staged/ComfyUI-Unload-Models'...
+#10 252.0 Cloning: mcmonkeyprojects/sd-dynamic-thresholding
+#10 252.0 Cloning into '/custom_nodes_staged/sd-dynamic-thresholding'...
+#10 253.1 Cloning: heshengtao/comfyui_LLM_party
+#10 253.1 Cloning into '/custom_nodes_staged/comfyui_LLM_party'...
+#10 258.5 Cloning: KLL535/ComfyUI_Simple_Qwen3-VL-gguf
+#10 258.5 Cloning into '/custom_nodes_staged/ComfyUI_Simple_Qwen3-VL-gguf'...
+#10 260.4 Cloning: 1038lab/ComfyUI-QwenVL
+#10 260.4 Cloning into '/custom_nodes_staged/ComfyUI-QwenVL'...
+#10 262.2 Cloning: alexcong/ComfyUI_QwenVL
+#10 262.2 Cloning into '/custom_nodes_staged/ComfyUI_QwenVL'...
+#10 263.8 Cloning: chrisgoringe/cg-image-filter
+#10 263.8 Cloning into '/custom_nodes_staged/cg-image-filter'...
+#10 272.2 Cloning: chrisgoringe/cg-image-picker
+#10 272.2 Cloning into '/custom_nodes_staged/cg-image-picker'...
+#10 279.7 Cloning: giriss/comfy-image-saver
+#10 279.7 Cloning into '/custom_nodes_staged/comfy-image-saver'...
+#10 280.3 Cloning: cubiq/ComfyUI_essentials
+#10 280.3 Cloning into '/custom_nodes_staged/ComfyUI_essentials'...
+#10 282.5 Cloning: WASasquatch/was-node-suite-comfyui
+#10 282.5 Cloning into '/custom_nodes_staged/was-node-suite-comfyui'...
+#10 285.7 Cloning: Suzie1/ComfyUI_Comfyroll_CustomNodes
+#10 285.7 Cloning into '/custom_nodes_staged/ComfyUI_Comfyroll_CustomNodes'...
+#10 295.9 Cloning: crystian/ComfyUI-Crystools
+#10 295.9 Cloning into '/custom_nodes_staged/ComfyUI-Crystools'...
+#10 330.6 Cloning: kijai/ComfyUI-KJNodes
+#10 330.6 Cloning into '/custom_nodes_staged/ComfyUI-KJNodes'...
+#10 338.2 Cloning: Derfuu/Derfuu_ComfyUI_ModdedNodes
+#10 338.2 Cloning into '/custom_nodes_staged/Derfuu_ComfyUI_ModdedNodes'...
+#10 339.0 Cloning: fearnworks/ComfyUI_FearnworksNodes
+#10 339.0 Cloning into '/custom_nodes_staged/ComfyUI_FearnworksNodes'...
+#10 341.4 Cloning: chflame163/ComfyUI_LayerStyle
+#10 341.4 Cloning into '/custom_nodes_staged/ComfyUI_LayerStyle'...
+#10 348.0 Cloning: adieyal/comfyui-dynamicprompts
+#10 348.0 Cloning into '/custom_nodes_staged/comfyui-dynamicprompts'...
+#10 349.3 Cloning: AIrjen/OneButtonPrompt
+#10 349.3 Cloning into '/custom_nodes_staged/OneButtonPrompt'...
+#10 352.7 Cloning: FizzleDorf/ComfyUI_FizzNodes
+#10 352.7 Cloning into '/custom_nodes_staged/ComfyUI_FizzNodes'...
+#10 354.1 Cloning: yawiii/comfyui_prompt_assistant
+#10 354.1 Cloning into '/custom_nodes_staged/comfyui_prompt_assistant'...
+#10 357.8 Cloning: alt-key-project/comfyui-dream-project
+#10 357.8 Cloning into '/custom_nodes_staged/comfyui-dream-project'...
+#10 358.5 Cloning: alt-key-project/comfyui-dream-video-batches
+#10 358.5 Cloning into '/custom_nodes_staged/comfyui-dream-video-batches'...
+#10 359.8 Cloning: storyicon/comfyui_segment_anything
+#10 359.8 Cloning into '/custom_nodes_staged/comfyui_segment_anything'...
+#10 360.6 Cloning: aria1th/ComfyUI-LogicUtils
+#10 360.6 Cloning into '/custom_nodes_staged/ComfyUI-LogicUtils'...
+#10 361.7 Cloning: AIDC-AI/ComfyUI-Copilot
+#10 361.7 Cloning into '/custom_nodes_staged/ComfyUI-Copilot'...
+#10 794.3 Cloning: ClownsharkBatwing/RES4LYF
+#10 794.4 Cloning into '/custom_nodes_staged/RES4LYF'...
+#10 1285.5 Cloning: GACLove/ComfyUI-VFI
+#10 1285.5 Cloning into '/custom_nodes_staged/ComfyUI-VFI'...
+#10 1286.9 Cloning: ComfyUI-GIMM-VFI
+#10 1286.9 Cloning into '/custom_nodes_staged/ComfyUI-GIMM-VFI'...
+#10 1287.3 remote: Not Found
+#10 1287.3 fatal: repository 'https://github.com/ComfyUI-GIMM-VFI.git/' not found
+#10 1287.3 Cloning: ComplexRobot/ComfyUI-Simple-VFI
+#10 1287.3 Cloning into '/custom_nodes_staged/ComfyUI-Simple-VFI'...
+#10 1288.2 Cloning: stduhpf/ComfyUI--Wan22FirstLastFrameToVideoLatent
+#10 1288.2 Cloning into '/custom_nodes_staged/ComfyUI--Wan22FirstLastFrameToVideoLatent'...
+#10 1288.9 Cloning: SparknightLLC/ComfyUI-LatentClamp
+#10 1288.9 Cloning into '/custom_nodes_staged/ComfyUI-LatentClamp'...
+#10 1289.6 Cloning: Clybius/ComfyUI-Latent-Modifiers
+#10 1289.6 Cloning into '/custom_nodes_staged/ComfyUI-Latent-Modifiers'...
+#10 1290.2 Cloning: kuschanow/ComfyUI-Advanced-Latent-Control
+#10 1290.2 Cloning into '/custom_nodes_staged/ComfyUI-Advanced-Latent-Control'...
+#10 1290.9 Cloning: SeanScripts/ComfyUI-Unload-Model
+#10 1290.9 Cloning into '/custom_nodes_staged/ComfyUI-Unload-Model'...
+#10 1291.5 Cloning: SparknightLLC/ComfyUI-GPENO
+#10 1291.5 fatal: destination path '/custom_nodes_staged/ComfyUI-GPENO' already exists and is not an empty directory.
+#10 1291.5 Cloning: kuschanow/ComfyUI-Advanced-Latent-Control
+#10 1291.5 fatal: destination path '/custom_nodes_staged/ComfyUI-Advanced-Latent-Control' already exists and is not an empty directory.
+#10 1291.5 Cloning: PozzettiAndrea/ComfyUI-SAM3
+#10 1291.5 Cloning into '/custom_nodes_staged/ComfyUI-SAM3'...
+#10 1298.6 Cloning: tungdop2/Comfyui_face_restorer
+#10 1298.6 Cloning into '/custom_nodes_staged/Comfyui_face_restorer'...
+#10 1299.8 Cloning: Lightricks/ComfyUI-LTXVideo
+#10 1299.8 Cloning into '/custom_nodes_staged/ComfyUI-LTXVideo'...
+#10 1312.5 Cloning: numz/ComfyUI-SeedVR2_VideoUpscaler
+#10 1312.5 Cloning into '/custom_nodes_staged/ComfyUI-SeedVR2_VideoUpscaler'...
+#10 1324.2 Cloning: GACLove/ComfyUI-VFI
+#10 1324.2 fatal: destination path '/custom_nodes_staged/ComfyUI-VFI' already exists and is not an empty directory.
+#10 1324.2 Cloning: silveroxides/ComfyUI_RIFE_TensorRT_Auto
+#10 1324.2 Cloning into '/custom_nodes_staged/ComfyUI_RIFE_TensorRT_Auto'...
+#10 1324.9 Cloning: yuvraj108c/ComfyUI-Rife-Tensorrt
+#10 1324.9 Cloning into '/custom_nodes_staged/ComfyUI-Rife-Tensorrt'...
+#10 1325.5 Cloning: ShmuelRonen/ComfyUI_wav2lip
+#10 1325.5 Cloning into '/custom_nodes_staged/ComfyUI_wav2lip'...
+#10 1327.9 Cloning: kijai/ComfyUI-MelBandRoFormer
+#10 1327.9 Cloning into '/custom_nodes_staged/ComfyUI-MelBandRoFormer'...
+#10 1328.7 Cloning: theUpsider/ComfyUI-Logic
+#10 1328.7 Cloning into '/custom_nodes_staged/ComfyUI-Logic'...
+#10 1329.3 Cloning: danTheMonk/comfyui-int-and-float
+#10 1329.3 Cloning into '/custom_nodes_staged/comfyui-int-and-float'...
+#10 1329.9 Cloning: mav-rik/facerestore_cf
+#10 1329.9 Cloning into '/custom_nodes_staged/facerestore_cf'...
+#10 1331.4 Cloning: Fannovel16/ComfyUI-Frame-Interpolation
+#10 1331.4 Cloning into '/custom_nodes_staged/ComfyUI-Frame-Interpolation'...
+#10 1334.2 Cloning: benjamin-bertram/Comfyui_OIDN_Denoiser
+#10 1334.2 Cloning into '/custom_nodes_staged/Comfyui_OIDN_Denoiser'...
+#10 1334.9 Cloning: Anze-/ComfyUI-OIDN
+#10 1334.9 Cloning into '/custom_nodes_staged/ComfyUI-OIDN'...
+#10 1344.3 Cloning: BigStationW/ComfyUi-Scale-Image-to-Total-Pixels-Advanced
+#10 1344.3 Cloning into '/custom_nodes_staged/ComfyUi-Scale-Image-to-Total-Pixels-Advanced'...
+#10 1345.0 Cloning: 1038lab/ComfyUI-RMBG
+#10 1345.0 Cloning into '/custom_nodes_staged/ComfyUI-RMBG'...
+#10 1347.2 Cloning: CY-CHENYUE/ComfyUI-InpaintEasy
+#10 1347.2 Cloning into '/custom_nodes_staged/ComfyUI-InpaintEasy'...
+#10 1348.9 Cloning: evanspearman/ComfyMath
+#10 1348.9 Cloning into '/custom_nodes_staged/ComfyMath'...
+#10 1349.6 Cloning: TTPlanetPig/Comfyui_TTP_Toolset
+#10 1349.6 Cloning into '/custom_nodes_staged/Comfyui_TTP_Toolset'...
+#10 1401.6 === Cloning Special Custom Nodes ===
+#10 1401.6 Cloning: https://codeberg.org/Gourieff/comfyui-reactor-node -> comfyui-reactor-node
+#10 1401.6 Cloning into '/custom_nodes_staged/comfyui-reactor-node'...
+#10 DONE 1403.6s
+
+#11 [stage-0 7/7] RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then         echo "=== Processing Special Pulls ===" | tee -a /install_logs/install.log;         while IFS='|' read -r repo ref type || [ -n "$repo" ]; do             [ -z "$repo" ] && continue;             case "$repo" in #*) continue ;; esac;             node_name=$(basename "$repo");             target_dir="/custom_nodes_staged/${node_name}";             echo "Processing special pull: ${repo} (${type}: ${ref})" | tee -a /install_logs/install.log;             if [ -d "$target_dir" ]; then                 cd "$target_dir" &&                 case "$type" in                     pr)                         echo "Fetching PR #${ref}" | tee -a /install_logs/install.log;                         git fetch origin pull/${ref}/head:pr-${ref} &&                         git checkout pr-${ref} &&                         echo "? Checked out PR #${ref}" | tee -a /install_logs/install.log;                         ;;                     commit)                         echo "Fetching commit ${ref}" | tee -a /install_logs/install.log;                         git fetch --depth=1 origin ${ref} &&                         git checkout ${ref} &&                         echo "? Checked out commit ${ref}" | tee -a /install_logs/install.log;                         ;;                     branch)                         echo "Switching to branch ${ref}" | tee -a /install_logs/install.log;                         git fetch origin ${ref} &&                         git checkout ${ref} &&                         echo "? Checked out branch ${ref}" | tee -a /install_logs/install.log;                         ;;                     *)                         echo "? Unknown type: ${type}" | tee -a /install_logs/failed_clones.txt;                         ;;                 esac || echo "Failed special pull: ${repo}" | tee -a /install_logs/failed_clones.txt;             else                 echo "? Node not found, cloning with special ref" | tee -a /install_logs/install.log;                 git clone https://github.com/${repo}.git "$target_dir" 2>&1 | tee -a /install_logs/clone.log &&                 cd "$target_dir" &&                 case "$type" in                     pr) git fetch origin pull/${ref}/head:pr-${ref} && git checkout pr-${ref} ;;                     commit) git fetch origin ${ref} && git checkout ${ref} ;;                     branch) git fetch origin ${ref} && git checkout ${ref} ;;                 esac || echo "Failed: ${repo}" | tee -a /install_logs/failed_clones.txt;             fi;         done < /tmp/custom_node_special_pulls.txt;     else         echo "=== No special pulls configured ===" | tee -a /install_logs/install.log;     fi
+#11 0.174 === Processing Special Pulls ===
+#11 0.176 Processing special pull: city96/ComfyUI-GGUF (pr: 399)
+#11 0.177 Fetching PR #399
+#11 1.152 From https://github.com/city96/ComfyUI-GGUF
+#11 1.152  * [new ref]         refs/pull/399/head -> pr-399
+#11 1.158 Switched to branch 'pr-399'
+#11 1.159 ? Checked out PR #399
+#11 DONE 1.2s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 5.9s done
+#12 writing image sha256:eed0667708326d203af075de80d97c885b3c8c6c0d3f698359b27b0b7f39dc45 done
+#12 naming to docker.io/library/custom-nodes-ready:cu126-pt26 done
+#12 DONE 5.9s

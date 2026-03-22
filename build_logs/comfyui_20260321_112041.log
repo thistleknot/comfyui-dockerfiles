@@ -1,0 +1,77 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 5.74kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0  1/18] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 2.95kB done
+#5 DONE 0.0s
+
+#6 [stage-0 10/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation     git+https://github.com/NVlabs/nvdiffrast.git
+#6 CACHED
+
+#7 [stage-0 11/18] RUN cd ComfyUI &&     mkdir -p         models/checkpoints models/vae models/loras models/embeddings         models/controlnet models/clip models/unet models/upscale_models         models/animatediff_models         models/tensorrt/rife         input output temp custom_nodes user/default &&     mv ../ComfyUI-Manager custom_nodes/ &&     if [ -d /custom_nodes_staged ] && [ "$(ls -A /custom_nodes_staged 2>/dev/null)" ]; then         cp -r /custom_nodes_staged/* custom_nodes/;     fi &&     chmod -R 755 /default-comfyui-bundle/ComfyUI
+#7 CACHED
+
+#8 [stage-0 16/18] RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 180; kill $! 2>/dev/null || true
+#8 CACHED
+
+#9 [stage-0  5/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#9 CACHED
+
+#10 [stage-0  7/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#10 CACHED
+
+#11 [stage-0 17/18] RUN cat > /tmp/update_config.py << 'EOF'
+#11 CACHED
+
+#12 [stage-0  4/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#12 CACHED
+
+#13 [stage-0  8/18] COPY extra_packages.txt /tmp/extra_packages.txt
+#13 CACHED
+
+#14 [stage-0  3/18] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#14 CACHED
+
+#15 [stage-0 14/18] RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large/
+#15 CACHED
+
+#16 [stage-0 13/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --no-deps pilmoji==2.0.4 &&     /venv/bin/pip install --no-deps dghs-imgutils
+#16 CACHED
+
+#17 [stage-0  9/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+#17 CACHED
+
+#18 [stage-0 15/18] RUN mkdir -p /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/
+#18 CACHED
+
+#19 [stage-0  2/18] WORKDIR /default-comfyui-bundle
+#19 CACHED
+
+#20 [stage-0 12/18] WORKDIR /default-comfyui-bundle/ComfyUI
+#20 CACHED
+
+#21 [stage-0  6/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#21 CACHED
+
+#22 [stage-0 18/18] RUN python3 /tmp/update_config.py && rm /tmp/update_config.py
+#22 CACHED
+
+#23 exporting to image
+#23 exporting layers done
+#23 writing image sha256:4b7b7170792608ee5713dca283820bf7c7228adc5fda2cfafad339fc82583710
+#23 writing image sha256:4b7b7170792608ee5713dca283820bf7c7228adc5fda2cfafad339fc82583710 done
+#23 naming to docker.io/library/sd-worker:staging done
+#23 DONE 0.0s
