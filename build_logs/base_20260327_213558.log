@@ -1,0 +1,76 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.base
+#1 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile.base
+#1 transferring dockerfile: 4.39kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+#2 DONE 0.6s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0 1/9] FROM docker.io/nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04@sha256:50efab398f76258daa91ceebb33b6467e40217c67ea44fb5a2cebc6be7d9cce3
+#4 CACHED
+
+#5 [stage-0 2/9] RUN apt-get update && apt-get install -y --no-install-recommends     python3.12 python3.12-dev python3.12-venv python3-pip     git cmake build-essential     portaudio19-dev libportaudio2     ffmpeg libsm6 libxext6     libtbb12     libegl1-mesa0 libgl1-mesa-dri &&     rm -rf /var/lib/apt/lists/*
+#5 0.431 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#5 0.455 Get:2 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  InRelease [1581 B]
+#5 0.581 Get:3 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#5 0.633 Get:4 https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64  Packages [1333 kB]
+#5 0.945 Get:5 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#5 1.097 Get:6 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#5 1.233 Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+#5 1.395 Get:8 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [3429 kB]
+#5 1.541 Get:9 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#5 1.546 Get:10 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#5 1.570 Get:11 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#5 2.502 Get:12 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [3601 kB]
+#5 2.848 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [38.1 kB]
+#5 2.848 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [2334 kB]
+#5 3.204 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2156 kB]
+#5 3.288 Get:16 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [695 B]
+#5 3.288 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.1 kB]
+#5 3.289 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.5 kB]
+#5 3.927 Get:19 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [34.8 kB]
+#5 4.085 Get:20 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1504 kB]
+#5 5.025 Get:21 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1954 kB]
+#5 6.770 Fetched 38.7 MB in 7s (5878 kB/s)
+#5 6.770 Reading package lists...
+#5 7.674 W: https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+#5 7.681 Reading package lists...
+#5 8.647 Building dependency tree...
+#5 8.857 Reading state information...
+#5 8.883 E: Unable to locate package libegl1-mesa0
+#5 ERROR: process "/bin/sh -c apt-get update && apt-get install -y --no-install-recommends     python3.12 python3.12-dev python3.12-venv python3-pip     git cmake build-essential     portaudio19-dev libportaudio2     ffmpeg libsm6 libxext6     libtbb12     libegl1-mesa0 libgl1-mesa-dri &&     rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100
+------
+ > [stage-0 2/9] RUN apt-get update && apt-get install -y --no-install-recommends     python3.12 python3.12-dev python3.12-venv python3-pip     git cmake build-essential     portaudio19-dev libportaudio2     ffmpeg libsm6 libxext6     libtbb12     libegl1-mesa0 libgl1-mesa-dri &&     rm -rf /var/lib/apt/lists/*:
+3.288 Get:16 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [695 B]
+3.288 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.1 kB]
+3.289 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.5 kB]
+3.927 Get:19 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [34.8 kB]
+4.085 Get:20 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1504 kB]
+5.025 Get:21 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1954 kB]
+
+
+
+8.883 E: Unable to locate package libegl1-mesa0
+------
+Dockerfile.base:8
+--------------------
+   7 |     # Layer 0: System packages
+   8 | >>> RUN apt-get update && apt-get install -y --no-install-recommends \
+   9 | >>>     python3.12 python3.12-dev python3.12-venv python3-pip \
+  10 | >>>     git cmake build-essential \
+  11 | >>>     portaudio19-dev libportaudio2 \
+  12 | >>>     ffmpeg libsm6 libxext6 \
+  13 | >>>     libtbb12 \
+  14 | >>>     libegl1-mesa0 libgl1-mesa-dri && \
+  15 | >>>     rm -rf /var/lib/apt/lists/*
+  16 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c apt-get update && apt-get install -y --no-install-recommends     python3.12 python3.12-dev python3.12-venv python3-pip     git cmake build-essential     portaudio19-dev libportaudio2     ffmpeg libsm6 libxext6     libtbb12     libegl1-mesa0 libgl1-mesa-dri &&     rm -rf /var/lib/apt/lists/*" did not complete successfully: exit code: 100

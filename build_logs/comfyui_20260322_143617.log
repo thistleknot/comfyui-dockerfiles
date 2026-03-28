@@ -1,0 +1,888 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 6.38kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 3.13kB done
+#4 DONE 0.0s
+
+#5 [stage-0  1/16] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#5 DONE 0.1s
+
+#6 [stage-0  2/16] WORKDIR /default-comfyui-bundle
+#6 DONE 0.0s
+
+#7 [stage-0  3/16] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#7 0.154 Cloning into 'ComfyUI'...
+#7 57.91 Cloning into 'ComfyUI-Manager'...
+#7 DONE 187.4s
+
+#8 [stage-0  4/16] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#8 DONE 0.0s
+
+#9 [stage-0  5/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#9 0.298 Using Python 3.12.3 environment at: /venv
+#9 0.965 Resolved 86 packages in 653ms
+#9 1.073 Uninstalled 2 packages in 96ms
+#9 1.076 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+#9 1.076          If the cache and target directories are on different filesystems, hardlinking may not be supported.
+#9 1.076          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+#9 6.051 Installed 32 packages in 4.97s
+#9 6.051  + bchlib==2.1.3
+#9 6.051  + bitmath==1.3.3.1
+#9 6.051  + bracex==2.6
+#9 6.051  + cachetools==7.0.5
+#9 6.051  + chardet==4.0.0
+#9 6.051  + cuda-bindings==13.2.0
+#9 6.051  + cuda-pathfinder==1.4.3
+#9 6.051  + cuda-python==13.2.0
+#9 6.051  + deprecation==2.1.0
+#9 6.051  + dghs-imgutils==0.19.0
+#9 6.051  - diffusers==0.36.0
+#9 6.051  + diffusers==0.30.0
+#9 6.051  + emoji==2.11.1
+#9 6.051  + flatbuffers==25.12.19
+#9 6.051  + hbutils==0.14.2
+#9 6.051  + hfutils==0.13.0
+#9 6.051  + natsort==8.4.0
+#9 6.051  + onnxruntime-gpu==1.24.4
+#9 6.052  + opencv-contrib-python==4.11.0.86
+#9 6.052  + piexif==1.1.3
+#9 6.052  + pilmoji==2.0.4
+#9 6.052  + pyclipper==1.4.0
+#9 6.052  - pyparsing==3.3.1
+#9 6.052  + pyparsing==3.0.9
+#9 6.052  + pyrfc6266==1.0.2
+#9 6.052  + pytimeparse==1.1.8
+#9 6.052  + random-user-agent==1.0.1
+#9 6.052  + shapely==2.1.2
+#9 6.052  + tensorrt-cu13==10.16.0.72
+#9 6.052  + tensorrt-cu13-bindings==10.16.0.72
+#9 6.052  + tensorrt-cu13-libs==10.16.0.72
+#9 6.052  + tzlocal==5.3.1
+#9 6.052  + urlobject==3.0.0
+#9 6.052  + wcmatch==10.1
+#9 DONE 31.5s
+
+#10 [stage-0  6/16] COPY extra_packages.txt /tmp/extra_packages.txt
+#10 DONE 0.1s
+
+#11 [stage-0  7/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+#11 0.729 Requirement already satisfied: setuptools in /venv/lib/python3.12/site-packages (80.9.0)
+#11 1.233 Collecting Cython
+#11 1.236   Using cached cython-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (7.5 kB)
+#11 1.275 Using cached cython-3.2.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.4 MB)
+#11 2.580 Installing collected packages: Cython
+#11 3.308 Successfully installed Cython-3.2.4
+#11 3.431 Using Python 3.12.3 environment at: /venv
+#11 4.923 Resolved 412 packages in 1.48s
+#11 5.220 Uninstalled 5 packages in 47ms
+#11 5.223 warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+#11 5.223          If the cache and target directories are on different filesystems, hardlinking may not be supported.
+#11 5.223          If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+#11 12.76 Installed 306 packages in 7.53s
+#11 12.95 Prepared 1 package without build isolation in 191ms
+#11 12.97 Installed 1 package in 18ms
+#11 12.97  + addict==2.4.0
+#11 12.97  + aiofiles==24.1.0
+#11 12.97  + aiohappyeyeballs==2.6.1
+#11 12.97  - aiohttp==3.9.5
+#11 12.97  + aiohttp==3.13.3
+#11 12.97  + aiohttp-socks==0.11.0
+#11 12.97  + aiosqlite==0.22.1
+#11 12.97  + aisuite==0.1.6
+#11 12.97  + albucore==0.0.24
+#11 12.97  + albumentations==2.0.8
+#11 12.97  + alembic==1.18.4
+#11 12.97  + altair==6.0.0
+#11 12.97  + anthropic==0.86.0
+#11 12.97  + antlr4-python3-runtime==4.9.3
+#11 12.97  + argon2-cffi==25.1.0
+#11 12.97  + argon2-cffi-bindings==25.1.0
+#11 12.97  + arrow==1.4.0
+#11 12.97  + arxiv==2.4.1
+#11 12.97  + asttokens==3.0.1
+#11 12.97  + async-lru==2.3.0
+#11 12.97  + attrdict==2.0.1
+#11 12.97  + audioread==3.1.0
+#11 12.97  + authlib==1.6.9
+#11 12.97  + av==17.0.0
+#11 12.97  + babel==2.18.0
+#11 12.97  + backoff==2.2.1
+#11 12.97  + banks==2.4.1
+#11 12.97  + beautifulsoup4==4.14.3
+#11 12.97  + bitsandbytes==0.49.2
+#11 12.97  + blake3==1.0.8
+#11 12.97  + bleach==6.3.0
+#11 12.97  + blend-modes==2.2.0
+#11 12.97  + blinker==1.9.0
+#11 12.97  + browser-use==0.11.13
+#11 12.97  + browser-use-sdk==3.3.1
+#11 12.97  + bubus==1.6.0
+#11 12.97  + cdp-use==1.4.5
+#11 12.97  + cloudpickle==3.1.2
+#11 12.97  + color-matcher==0.6.0
+#11 12.97  + colorama==0.4.6
+#11 12.97  + colored==2.3.1
+#11 12.97  + comfy-aimdo==0.2.12
+#11 12.97  + comfy-kitchen==0.2.8
+#11 12.97  + comfyui-embedded-docs==0.4.3
+#11 12.97  + comfyui-frontend-package==1.41.21
+#11 12.97  + comfyui-workflow-templates==0.9.26
+#11 12.97  + comfyui-workflow-templates-core==0.3.173
+#11 12.97  + comfyui-workflow-templates-media-api==0.3.64
+#11 12.97  + comfyui-workflow-templates-media-image==0.3.107
+#11 12.97  + comfyui-workflow-templates-media-other==0.3.146
+#11 12.97  + comfyui-workflow-templates-media-video==0.3.62
+#11 12.97  + comm==0.2.3
+#11 12.97  + compel==2.3.1
+#11 12.97  + cryptography==46.0.0
+#11 12.97  + dataclasses-json==0.6.7
+#11 12.97  + ddt==1.7.2
+#11 12.97  + debugpy==1.8.20
+#11 12.97  + decorator==4.4.2
+#11 12.97  + decord==0.6.0
+#11 12.97  + deepdiff==8.6.2
+#11 12.97  + defusedxml==0.7.1
+#11 12.97  + deprecated==1.3.1
+#11 12.97  + dirtyjson==1.0.8
+#11 12.97  + discord-py==2.7.1
+#11 12.97  + docutils==0.22.4
+#11 12.97  + docx2txt==0.9
+#11 12.97  + dynamicprompts==0.31.0
+#11 12.97  + easydict==1.13
+#11 12.97  + easyocr==1.7.2
+#11 12.97  + et-xmlfile==2.0.0
+#11 12.97  + evalidate==2.1.4
+#11 12.97  + executing==2.2.1
+#11 12.97  + facexlib==0.3.0
+#11 12.97  + fastjsonschema==2.21.2
+#11 12.97  + feedparser==6.0.12
+#11 12.97  + ffmpeg-python==0.2.0
+#11 12.97  + filetype==1.2.0
+#11 12.97  + filterpy==1.4.5
+#11 12.97  + fish-audio-sdk==1.3.0
+#11 12.97  + fqdn==1.5.1
+#11 12.97  + ftfy==6.3.1
+#11 12.97  + future==1.0.0
+#11 12.97  + glfw==2.10.0
+#11 12.97  + google-ai-generativelanguage==0.6.15
+#11 12.97  + google-api-core==2.30.0
+#11 12.97  + google-api-python-client==2.193.0
+#11 12.97  + google-auth==2.49.1
+#11 12.97  + google-auth-httplib2==0.3.0
+#11 12.97  + google-auth-oauthlib==1.3.0
+#11 12.97  + google-genai==1.68.0
+#11 12.97  + google-generativeai==0.8.6
+#11 12.97  + googleapis-common-protos==1.73.0
+#11 12.97  + greenlet==3.3.2
+#11 12.97  + griffe==1.15.0
+#11 12.97  + groq==1.1.1
+#11 12.97  + grpcio==1.78.0
+#11 12.97  + grpcio-status==1.71.2
+#11 12.97  + h2==4.3.0
+#11 12.97  + hpack==4.1.0
+#11 12.97  + html2image==2.0.7
+#11 12.97  + httplib2==0.31.1
+#11 12.97  + httpx-sse==0.4.3
+#11 12.97  + httpx-ws==0.8.2
+#11 12.97  + hydra-core==1.3.2
+#11 12.97  + hyperframe==6.1.0
+#11 12.97  + imageio==2.37.3
+#11 12.97  + imageio-ffmpeg==0.6.0
+#11 12.97  + imagesize==2.0.0
+#11 12.97  + imgutils==0.1.2
+#11 12.97  + inquirerpy==0.3.4
+#11 12.97  + insightface==0.7.3
+#11 12.97  + iopath==0.1.10
+#11 12.97  + ipykernel==7.2.0
+#11 12.97  + ipython==9.10.0
+#11 12.97  + ipython-pygments-lexers==1.1.1
+#11 12.97  + isoduration==20.11.0
+#11 12.97  + jedi==0.19.2
+#11 12.97  + json-repair==0.58.6
+#11 12.97  + json5==0.13.0
+#11 12.97  + jsonpatch==1.33
+#11 12.97  + jsonpointer==3.1.0
+#11 12.97  + jsonschema==4.26.0
+#11 12.97  + jsonschema-specifications==2025.9.1
+#11 12.97  + jupyter-client==8.8.0
+#11 12.97  + jupyter-core==5.9.1
+#11 12.97  + jupyter-events==0.12.0
+#11 12.97  + jupyter-lsp==2.3.0
+#11 12.97  + jupyter-server==2.17.0
+#11 12.97  + jupyter-server-terminals==0.5.4
+#11 12.97  + jupyterlab==4.5.6
+#11 12.97  + jupyterlab-pygments==0.3.0
+#11 12.97  + jupyterlab-server==2.28.0
+#11 12.97  + keyboard==0.13.5
+#11 12.97  + kornia==0.8.2
+#11 12.97  + kornia-rs==0.1.10
+#11 12.97  + langchain-classic==1.0.3
+#11 12.97  + langchain-community==0.4.1
+#11 12.97  + langchain-core==1.2.20
+#11 12.97  + langchain-ollama==1.0.1
+#11 12.97  + langchain-openai==1.1.11
+#11 12.97  + langchain-text-splitters==1.1.1
+#11 12.97  + langsmith==0.7.22
+#11 12.97  + lark==1.3.1
+#11 12.97  + latex2mathml==3.79.0
+#11 12.97  + lazy-loader==0.5
+#11 12.97  + librosa==0.11.0
+#11 12.97  + llama-index-core==0.14.18
+#11 12.97  + llama-index-instrumentation==0.5.0
+#11 12.97  + llama-index-llms-openai==0.7.3
+#11 12.97  + llama-index-workflows==2.17.1
+#11 12.97  + llvmlite==0.46.0
+#11 12.97  + lpips==0.1.4
+#11 12.97  + lxml==6.0.2
+#11 12.97  + mako==1.3.10
+#11 12.97  + markdown==3.10.2
+#11 12.97  + markdownify==1.2.2
+#11 12.97  + marshmallow==3.26.2
+#11 12.97  + matplotlib-inline==0.2.1
+#11 12.97  + matrix-nio==0.25.2
+#11 12.97  + mcp==1.26.0
+#11 12.97  + mdtex2html==1.3.2
+#11 12.97  + mistune==3.2.0
+#11 12.97  + ml-dtypes==0.5.4
+#11 12.97  + moviepy==1.0.3
+#11 12.97  + msgpack==1.1.2
+#11 12.97  + mypy-extensions==1.1.0
+#11 12.97  + narwhals==2.18.0
+#11 12.97  + nbclient==0.10.4
+#11 12.97  + nbconvert==7.17.0
+#11 12.97  + nbformat==5.10.4
+#11 12.97  + neo4j==6.1.0
+#11 12.97  + nest-asyncio==1.6.0
+#11 12.97  + ninja==1.13.0
+#11 12.97  + nltk==3.9.3
+#11 12.97  + notebook==7.5.5
+#11 12.97  + notebook-shim==0.2.4
+#11 12.97  + numba==0.64.0
+#11 12.97  + numexpr==2.14.1
+#11 12.97  + nvidia-ml-py==13.595.45
+#11 12.97  + oauthlib==3.3.1
+#11 12.97  + oidn==0.2.1
+#11 12.97  + ollama==0.6.1
+#11 12.97  + omegaconf==2.3.0
+#11 12.97  + onnx==1.20.1
+#11 12.97  - openai==1.55.3
+#11 12.97  + openai==2.29.0
+#11 12.97  + openai-agents==0.12.5
+#11 12.97  + opencv-python==4.11.0.86
+#11 12.97  + opencv-python-headless==4.11.0.86
+#11 12.97  + openpyxl==3.1.5
+#11 12.97  + orderly-set==5.5.0
+#11 12.97  + orjson==3.11.7
+#11 12.97  + ormsgpack==1.12.2
+#11 12.97  + pandocfilters==1.5.1
+#11 12.97  + parso==0.8.6
+#11 12.97  + pdfminer-six==20251230
+#11 12.97  + pdfplumber==0.11.9
+#11 12.97  + peft==0.18.1
+#11 12.97  + pexpect==4.9.0
+#11 12.97  + pfzy==0.3.4
+#11 12.97  + platformdirs==4.9.4
+#11 12.97  + polars==1.39.3
+#11 12.97  + polars-runtime-32==1.39.3
+#11 12.97  + polygraphy==0.49.26
+#11 12.97  + pooch==1.9.0
+#11 12.97  + portalocker==2.10.1
+#11 12.97  + posthog==7.9.12
+#11 12.97  + prettytable==3.17.0
+#11 12.97  + proglog==0.1.12
+#11 12.97  + prompt-toolkit==3.0.52
+#11 12.97  + proto-plus==1.27.1
+#11 12.97  - protobuf==4.25.8
+#11 12.97  + protobuf==5.29.6
+#11 12.97  + ptyprocess==0.7.0
+#11 12.97  + pure-eval==0.2.3
+#11 12.97  + py-cpuinfo==9.0.0
+#11 12.97  + pyasn1==0.6.3
+#11 12.97  + pyasn1-modules==0.4.2
+#11 12.98  + pycocotools==2.0.11
+#11 12.98  + pycryptodome==3.23.0
+#11 12.98  - pydantic==2.11.10
+#11 12.98  + pydantic==2.12.5
+#11 12.98  - pydantic-core==2.33.2
+#11 12.98  + pydantic-core==2.41.5
+#11 12.98  + pydantic-settings==2.13.1
+#11 12.98  + pydeck==0.9.1
+#11 12.98  + pydub==0.25.1
+#11 12.98  + pygithub==2.9.0
+#11 12.98  + pyjwt==2.12.1
+#11 12.98  + pymeshlab==2025.7.post1
+#11 12.98  + pynacl==1.6.0
+#11 12.98  + pynvml==13.0.1
+#11 12.98  + pyopengl==3.1.10
+#11 12.98  + pyotp==2.9.0
+#11 12.98  + pypdf==6.9.1
+#11 12.98  + pypdfium2==5.6.0
+#11 12.98  + python-bidi==0.6.7
+#11 12.98  + python-docx==1.2.0
+#11 12.98  + python-dotenv==1.2.2
+#11 12.98  + python-json-logger==4.0.0
+#11 12.98  + python-multipart==0.0.22
+#11 12.98  + python-socks==2.8.1
+#11 12.98  + pywavelets==1.9.0
+#11 12.98  + pyzmq==27.1.0
+#11 12.98  + qwen-vl-utils==0.0.14
+#11 12.98  + redis==7.3.0
+#11 12.98  + referencing==0.37.0
+#11 12.98  + reportlab==4.4.10
+#11 12.98  + requests-oauthlib==2.0.0
+#11 12.98  + requests-toolbelt==1.0.0
+#11 12.98  + rfc3339-validator==0.1.4
+#11 12.98  + rfc3986-validator==0.1.1
+#11 12.98  + rfc3987-syntax==1.1.0
+#11 12.98  + rotary-embedding-torch==0.8.9
+#11 12.98  + rpds-py==0.30.0
+#11 12.98  + sageattention==1.0.6
+#11 12.98  + sam-2==1.0 (from git+https://github.com/facebookresearch/sam2@2b90b9f5ceec907a1c18123530e92e794ad901a4)
+#11 12.98  + scikit-image==0.26.0
+#11 12.98  + screeninfo==0.8.1
+#11 12.98  + segment-anything==1.0
+#11 12.98  + send2trash==2.1.0
+#11 12.98  + sgmllib3k==1.0.0
+#11 12.98  + simpleeval==1.0.7
+#11 12.98  + simsimd==6.5.16
+#11 12.98  + sounddevice==0.5.5
+#11 12.98  + soundfile==0.13.1
+#11 12.98  + soupsieve==2.8.3
+#11 12.98  + soxr==1.0.0
+#11 12.98  + spandrel==0.4.2
+#11 12.98  + sqlalchemy==2.0.48
+#11 12.98  + srt==3.5.3
+#11 12.98  + sse-starlette==3.3.3
+#11 12.98  + stack-data==0.6.3
+#11 12.98  + starlette==1.0.0
+#11 12.98  + streamlit==1.55.0
+#11 12.98  + stringzilla==4.6.0
+#11 12.98  + tenacity==9.1.4
+#11 12.98  + terminado==0.18.1
+#11 12.98  + tifffile==2026.3.3
+#11 12.98  + tiktoken==0.12.0
+#11 12.98  + timm==1.0.25
+#11 12.98  + tinycss2==1.4.0
+#11 12.98  + tinytag==2.2.1
+#11 12.98  + toml==0.10.2
+#11 12.98  + torchsde==0.2.6
+#11 12.98  + tornado==6.5.5
+#11 12.98  + traitlets==5.14.3
+#11 12.98  + trampoline==0.1.2
+#11 12.98  + trimesh==4.11.4
+#11 12.98  + types-requests==2.32.4.20260107
+#11 12.98  + typing-inspect==0.9.0
+#11 12.98  + ultralytics==8.4.24
+#11 12.98  + ultralytics-thop==2.0.18
+#11 12.98  + unpaddedbase64==2.1.0
+#11 12.98  + uri-template==1.3.0
+#11 12.98  + uritemplate==4.2.0
+#11 12.98  + uuid-utils==0.14.1
+#11 12.98  + uuid7==0.1.0
+#11 12.98  + uvicorn==0.42.0
+#11 12.98  + voluptuous==0.16.0
+#11 12.98  + watchdog==6.0.0
+#11 12.98  + wcwidth==0.6.0
+#11 12.98  + webcolors==25.10.0
+#11 12.98  + webencodings==0.5.1
+#11 12.98  + websocket-client==1.9.0
+#11 12.98  + websockets==16.0
+#11 12.98  + wikipedia==1.4.0
+#11 12.98  + wrapt==2.1.2
+#11 12.98  + wsproto==1.3.2
+#11 12.98  + xlrd==2.0.2
+#11 12.98  + yapf==0.43.0
+#11 12.98  + zstandard==0.25.0
+#11 DONE 19.6s
+
+#12 [stage-0  8/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation     git+https://github.com/NVlabs/nvdiffrast.git
+#12 0.963 Collecting git+https://github.com/NVlabs/nvdiffrast.git
+#12 0.963   Cloning https://github.com/NVlabs/nvdiffrast.git to /tmp/pip-req-build-nccv2kne
+#12 0.965   Running command git clone --filter=blob:none --quiet https://github.com/NVlabs/nvdiffrast.git /tmp/pip-req-build-nccv2kne
+#12 34.54   Resolved https://github.com/NVlabs/nvdiffrast.git to commit 253ac4fcea7de5f396371124af597e6cc957bfae
+#12 34.54   Preparing metadata (pyproject.toml): started
+#12 37.26   Preparing metadata (pyproject.toml): finished with status 'done'
+#12 37.26 Requirement already satisfied: numpy in /venv/lib/python3.12/site-packages (from nvdiffrast==0.4.0) (1.26.4)
+#12 37.27 Building wheels for collected packages: nvdiffrast
+#12 37.27   Building wheel for nvdiffrast (pyproject.toml): started
+#12 92.63   Building wheel for nvdiffrast (pyproject.toml): finished with status 'done'
+#12 92.67   Created wheel for nvdiffrast: filename=nvdiffrast-0.4.0-cp312-cp312-linux_x86_64.whl size=14709379 sha256=b50f93e77908fc87b1db9e55f48168a7ac8c72641e25564491400744ce2deeae
+#12 92.67   Stored in directory: /tmp/pip-ephem-wheel-cache-x1qy1nrs/wheels/d1/82/ea/91b5b9219953f7784a69f9e8d2dacad80beb8a99a5e46af62e
+#12 92.68 Successfully built nvdiffrast
+#12 95.49 Installing collected packages: nvdiffrast
+#12 95.67 Successfully installed nvdiffrast-0.4.0
+#12 DONE 95.8s
+
+#13 [stage-0  9/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     git clone https://github.com/IDEA-Research/GroundingDINO.git /tmp/GroundingDINO &&     sed -i 's/AT_DISPATCH_FLOATING_TYPES(value\.type()/AT_DISPATCH_FLOATING_TYPES(value.scalar_type()/g'         /tmp/GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu &&     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation /tmp/GroundingDINO &&     rm -rf /tmp/GroundingDINO
+#13 0.154 Cloning into '/tmp/GroundingDINO'...
+#13 13.05 Processing /tmp/GroundingDINO
+#13 13.05   Preparing metadata (pyproject.toml): started
+#13 15.43   Preparing metadata (pyproject.toml): finished with status 'done'
+#13 15.43 Requirement already satisfied: torch in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (2.6.0+cu126)
+#13 15.43 Requirement already satisfied: torchvision in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (0.21.0+cu126)
+#13 15.44 Requirement already satisfied: transformers in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (4.57.6)
+#13 15.44 Requirement already satisfied: addict in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (2.4.0)
+#13 15.44 Requirement already satisfied: yapf in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (0.43.0)
+#13 15.44 Requirement already satisfied: timm in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (1.0.25)
+#13 15.45 Requirement already satisfied: numpy in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (1.26.4)
+#13 15.45 Requirement already satisfied: opencv-python in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (4.11.0.86)
+#13 15.78 Collecting supervision>=0.22.0 (from groundingdino==0.1.0)
+#13 15.78   Using cached supervision-0.27.0.post2-py3-none-any.whl.metadata (13 kB)
+#13 15.78 Requirement already satisfied: pycocotools in /venv/lib/python3.12/site-packages (from groundingdino==0.1.0) (2.0.11)
+#13 15.80 Requirement already satisfied: scipy>=1.10.0 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (1.17.0)
+#13 15.80 Requirement already satisfied: matplotlib>=3.6.0 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (3.10.8)
+#13 15.80 Requirement already satisfied: pyyaml>=5.3 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (6.0.3)
+#13 15.80 Requirement already satisfied: defusedxml>=0.7.1 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (0.7.1)
+#13 15.80 Requirement already satisfied: pillow>=9.4 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (11.3.0)
+#13 15.81 Requirement already satisfied: requests>=2.26.0 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (2.32.5)
+#13 15.81 Requirement already satisfied: tqdm>=4.62.3 in /venv/lib/python3.12/site-packages (from supervision>=0.22.0->groundingdino==0.1.0) (4.67.1)
+#13 15.95 Collecting pyDeprecate<0.6.0,>=0.4.0 (from supervision>=0.22.0->groundingdino==0.1.0)
+#13 15.95   Using cached pydeprecate-0.5.0-py3-none-any.whl.metadata (41 kB)
+#13 16.00 Requirement already satisfied: huggingface_hub in /venv/lib/python3.12/site-packages (from timm->groundingdino==0.1.0) (0.36.0)
+#13 16.00 Requirement already satisfied: safetensors in /venv/lib/python3.12/site-packages (from timm->groundingdino==0.1.0) (0.7.0)
+#13 16.02 Requirement already satisfied: filelock in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (3.20.3)
+#13 16.02 Requirement already satisfied: typing-extensions>=4.10.0 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (4.15.0)
+#13 16.02 Requirement already satisfied: setuptools in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (80.9.0)
+#13 16.03 Requirement already satisfied: sympy==1.13.1 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (1.13.1)
+#13 16.03 Requirement already satisfied: networkx in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (3.6.1)
+#13 16.03 Requirement already satisfied: jinja2 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (3.1.6)
+#13 16.03 Requirement already satisfied: fsspec in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (2024.9.0)
+#13 16.03 Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.6.77 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.77)
+#13 16.03 Requirement already satisfied: nvidia-cuda-runtime-cu12==12.6.77 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.77)
+#13 16.03 Requirement already satisfied: nvidia-cuda-cupti-cu12==12.6.80 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.80)
+#13 16.03 Requirement already satisfied: nvidia-cudnn-cu12==9.5.1.17 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (9.5.1.17)
+#13 16.04 Requirement already satisfied: nvidia-cublas-cu12==12.6.4.1 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.4.1)
+#13 16.04 Requirement already satisfied: nvidia-cufft-cu12==11.3.0.4 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (11.3.0.4)
+#13 16.04 Requirement already satisfied: nvidia-curand-cu12==10.3.7.77 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (10.3.7.77)
+#13 16.04 Requirement already satisfied: nvidia-cusolver-cu12==11.7.1.2 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (11.7.1.2)
+#13 16.04 Requirement already satisfied: nvidia-cusparse-cu12==12.5.4.2 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.5.4.2)
+#13 16.04 Requirement already satisfied: nvidia-cusparselt-cu12==0.6.3 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (0.6.3)
+#13 16.04 Requirement already satisfied: nvidia-nccl-cu12==2.21.5 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (2.21.5)
+#13 16.05 Requirement already satisfied: nvidia-nvtx-cu12==12.6.77 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.77)
+#13 16.05 Requirement already satisfied: nvidia-nvjitlink-cu12==12.6.85 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (12.6.85)
+#13 16.05 Requirement already satisfied: triton==3.2.0 in /venv/lib/python3.12/site-packages (from torch->groundingdino==0.1.0) (3.2.0)
+#13 16.07 Requirement already satisfied: mpmath<1.4,>=1.1.0 in /venv/lib/python3.12/site-packages (from sympy==1.13.1->torch->groundingdino==0.1.0) (1.3.0)
+#13 16.31 Requirement already satisfied: packaging>=20.0 in /venv/lib/python3.12/site-packages (from transformers->groundingdino==0.1.0) (25.0)
+#13 16.31 Requirement already satisfied: regex!=2019.12.17 in /venv/lib/python3.12/site-packages (from transformers->groundingdino==0.1.0) (2026.1.15)
+#13 16.31 Requirement already satisfied: tokenizers<=0.23.0,>=0.22.0 in /venv/lib/python3.12/site-packages (from transformers->groundingdino==0.1.0) (0.22.2)
+#13 16.32 Requirement already satisfied: platformdirs>=3.5.1 in /venv/lib/python3.12/site-packages (from yapf->groundingdino==0.1.0) (4.9.4)
+#13 16.39 Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /venv/lib/python3.12/site-packages (from huggingface_hub->timm->groundingdino==0.1.0) (1.2.0)
+#13 16.45 Requirement already satisfied: contourpy>=1.0.1 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (1.3.3)
+#13 16.45 Requirement already satisfied: cycler>=0.10 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (0.12.1)
+#13 16.45 Requirement already satisfied: fonttools>=4.22.0 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (4.61.1)
+#13 16.45 Requirement already satisfied: kiwisolver>=1.3.1 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (1.4.9)
+#13 16.46 Requirement already satisfied: pyparsing>=3 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (3.0.9)
+#13 16.46 Requirement already satisfied: python-dateutil>=2.7 in /venv/lib/python3.12/site-packages (from matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (2.9.0.post0)
+#13 16.50 Requirement already satisfied: charset_normalizer<4,>=2 in /venv/lib/python3.12/site-packages (from requests>=2.26.0->supervision>=0.22.0->groundingdino==0.1.0) (3.4.4)
+#13 16.50 Requirement already satisfied: idna<4,>=2.5 in /venv/lib/python3.12/site-packages (from requests>=2.26.0->supervision>=0.22.0->groundingdino==0.1.0) (3.11)
+#13 16.50 Requirement already satisfied: urllib3<3,>=1.21.1 in /venv/lib/python3.12/site-packages (from requests>=2.26.0->supervision>=0.22.0->groundingdino==0.1.0) (2.6.3)
+#13 16.50 Requirement already satisfied: certifi>=2017.4.17 in /venv/lib/python3.12/site-packages (from requests>=2.26.0->supervision>=0.22.0->groundingdino==0.1.0) (2026.1.4)
+#13 16.58 Requirement already satisfied: MarkupSafe>=2.0 in /venv/lib/python3.12/site-packages (from jinja2->torch->groundingdino==0.1.0) (3.0.3)
+#13 16.74 Requirement already satisfied: six>=1.5 in /venv/lib/python3.12/site-packages (from python-dateutil>=2.7->matplotlib>=3.6.0->supervision>=0.22.0->groundingdino==0.1.0) (1.17.0)
+#13 16.76 Using cached supervision-0.27.0.post2-py3-none-any.whl (217 kB)
+#13 16.76 Using cached pydeprecate-0.5.0-py3-none-any.whl (38 kB)
+#13 16.76 Building wheels for collected packages: groundingdino
+#13 16.77   Building wheel for groundingdino (pyproject.toml): started
+#13 46.58   Building wheel for groundingdino (pyproject.toml): finished with status 'done'
+#13 46.59   Created wheel for groundingdino: filename=groundingdino-0.1.0-cp312-cp312-linux_x86_64.whl size=2968654 sha256=6a38e20d5aa943a7d9835cf1886dd17c3245150a536b1c3db5f2f02edfdc3808
+#13 46.59   Stored in directory: /tmp/pip-ephem-wheel-cache-wyyhok7z/wheels/f2/5b/67/4fc11ce2de79c2dea26bffac68aef8f0364ea9b109630e73c0
+#13 46.59 Successfully built groundingdino
+#13 49.20 Installing collected packages: pyDeprecate, supervision, groundingdino
+#13 49.51 Successfully installed groundingdino-0.1.0 pyDeprecate-0.5.0 supervision-0.27.0.post2
+#13 DONE 49.7s
+
+#14 [stage-0 10/16] RUN cd ComfyUI &&     mkdir -p         models/checkpoints models/vae models/loras models/embeddings         models/controlnet models/clip models/unet models/upscale_models         models/animatediff_models         models/tensorrt/rife         input output temp custom_nodes user/default &&     mv ../ComfyUI-Manager custom_nodes/ &&     if [ -d /custom_nodes_staged ] && [ "$(ls -A /custom_nodes_staged 2>/dev/null)" ]; then         cp -r /custom_nodes_staged/* custom_nodes/;     fi &&     chmod -R 755 /default-comfyui-bundle/ComfyUI
+#14 DONE 1.3s
+
+#15 [stage-0 11/16] WORKDIR /default-comfyui-bundle/ComfyUI
+#15 DONE 0.0s
+
+#16 [stage-0 12/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --no-deps pilmoji==2.0.4 &&     /venv/bin/pip install --no-deps dghs-imgutils &&     /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 &&     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools &&     /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true &&     /venv/bin/pip install --no-deps onnxruntime-gpu &&     /venv/bin/pip install --cache-dir=/pip-cache comfyui-manager &&     python3 - << 'EOF'
+#16 0.920 Requirement already satisfied: pilmoji==2.0.4 in /venv/lib/python3.12/site-packages (2.0.4)
+#16 1.583 Requirement already satisfied: dghs-imgutils in /venv/lib/python3.12/site-packages (0.19.0)
+#16 2.574 Collecting opencv-contrib-python==4.13.0.92
+#16 2.733   Downloading opencv_contrib_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl.metadata (19 kB)
+#16 2.793 Downloading opencv_contrib_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl (79.2 MB)
+#16 30.00    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.2/79.2 MB 1.9 MB/s eta 0:00:00
+#16 30.19 Installing collected packages: opencv-contrib-python
+#16 30.19   Attempting uninstall: opencv-contrib-python
+#16 30.30     Found existing installation: opencv-contrib-python 4.11.0.86
+#16 30.31     Uninstalling opencv-contrib-python-4.11.0.86:
+#16 31.07       Successfully uninstalled opencv-contrib-python-4.11.0.86
+#16 32.05 Successfully installed opencv-contrib-python-4.13.0.92
+#16 32.16 Using Python 3.12.3 environment at: /venv
+#16 32.18 Audited 1 package in 14ms
+#16 33.57 Requirement already satisfied: onnxruntime-gpu in /venv/lib/python3.12/site-packages (1.24.4)
+#16 34.54 Collecting comfyui-manager
+#16 34.77   Downloading comfyui_manager-4.0.5-py3-none-any.whl.metadata (23 kB)
+#16 34.82 Requirement already satisfied: GitPython in /venv/lib/python3.12/site-packages (from comfyui-manager) (3.1.46)
+#16 34.82 Requirement already satisfied: PyGithub in /venv/lib/python3.12/site-packages (from comfyui-manager) (2.9.0)
+#16 34.82 Requirement already satisfied: transformers in /venv/lib/python3.12/site-packages (from comfyui-manager) (4.57.6)
+#16 34.83 Requirement already satisfied: huggingface-hub>0.20 in /venv/lib/python3.12/site-packages (from comfyui-manager) (0.36.0)
+#16 34.83 Requirement already satisfied: typer in /venv/lib/python3.12/site-packages (from comfyui-manager) (0.15.4)
+#16 34.83 Requirement already satisfied: rich in /venv/lib/python3.12/site-packages (from comfyui-manager) (14.2.0)
+#16 34.83 Requirement already satisfied: typing-extensions in /venv/lib/python3.12/site-packages (from comfyui-manager) (4.15.0)
+#16 34.83 Requirement already satisfied: toml in /venv/lib/python3.12/site-packages (from comfyui-manager) (0.10.2)
+#16 34.83 Requirement already satisfied: uv in /venv/lib/python3.12/site-packages (from comfyui-manager) (0.9.26)
+#16 34.83 Requirement already satisfied: chardet in /venv/lib/python3.12/site-packages (from comfyui-manager) (4.0.0)
+#16 34.91 Requirement already satisfied: filelock in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (3.20.3)
+#16 34.91 Requirement already satisfied: fsspec>=2023.5.0 in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (2024.9.0)
+#16 34.91 Requirement already satisfied: packaging>=20.9 in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (25.0)
+#16 34.91 Requirement already satisfied: pyyaml>=5.1 in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (6.0.3)
+#16 34.91 Requirement already satisfied: requests in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (2.32.5)
+#16 34.92 Requirement already satisfied: tqdm>=4.42.1 in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (4.67.1)
+#16 34.92 Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /venv/lib/python3.12/site-packages (from huggingface-hub>0.20->comfyui-manager) (1.2.0)
+#16 34.94 Requirement already satisfied: gitdb<5,>=4.0.1 in /venv/lib/python3.12/site-packages (from GitPython->comfyui-manager) (4.0.12)
+#16 34.94 Requirement already satisfied: pynacl>=1.4.0 in /venv/lib/python3.12/site-packages (from PyGithub->comfyui-manager) (1.6.0)
+#16 34.94 Requirement already satisfied: pyjwt>=2.4.0 in /venv/lib/python3.12/site-packages (from pyjwt[crypto]>=2.4.0->PyGithub->comfyui-manager) (2.12.1)
+#16 34.95 Requirement already satisfied: urllib3>=1.26.0 in /venv/lib/python3.12/site-packages (from PyGithub->comfyui-manager) (2.6.3)
+#16 34.95 Requirement already satisfied: markdown-it-py>=2.2.0 in /venv/lib/python3.12/site-packages (from rich->comfyui-manager) (4.0.0)
+#16 34.95 Requirement already satisfied: pygments<3.0.0,>=2.13.0 in /venv/lib/python3.12/site-packages (from rich->comfyui-manager) (2.19.2)
+#16 35.24 Requirement already satisfied: numpy>=1.17 in /venv/lib/python3.12/site-packages (from transformers->comfyui-manager) (1.26.4)
+#16 35.24 Requirement already satisfied: regex!=2019.12.17 in /venv/lib/python3.12/site-packages (from transformers->comfyui-manager) (2026.1.15)
+#16 35.24 Requirement already satisfied: tokenizers<=0.23.0,>=0.22.0 in /venv/lib/python3.12/site-packages (from transformers->comfyui-manager) (0.22.2)
+#16 35.25 Requirement already satisfied: safetensors>=0.4.3 in /venv/lib/python3.12/site-packages (from transformers->comfyui-manager) (0.7.0)
+#16 35.25 Requirement already satisfied: click<8.2,>=8.0.0 in /venv/lib/python3.12/site-packages (from typer->comfyui-manager) (8.1.8)
+#16 35.25 Requirement already satisfied: shellingham>=1.3.0 in /venv/lib/python3.12/site-packages (from typer->comfyui-manager) (1.5.4)
+#16 35.33 Requirement already satisfied: smmap<6,>=3.0.1 in /venv/lib/python3.12/site-packages (from gitdb<5,>=4.0.1->GitPython->comfyui-manager) (5.0.2)
+#16 35.35 Requirement already satisfied: mdurl~=0.1 in /venv/lib/python3.12/site-packages (from markdown-it-py>=2.2.0->rich->comfyui-manager) (0.1.2)
+#16 35.38 Requirement already satisfied: cryptography>=3.4.0 in /venv/lib/python3.12/site-packages (from pyjwt[crypto]>=2.4.0->PyGithub->comfyui-manager) (46.0.0)
+#16 35.39 Requirement already satisfied: cffi>=1.4.1 in /venv/lib/python3.12/site-packages (from pynacl>=1.4.0->PyGithub->comfyui-manager) (1.16.0)
+#16 35.40 Requirement already satisfied: charset_normalizer<4,>=2 in /venv/lib/python3.12/site-packages (from requests->huggingface-hub>0.20->comfyui-manager) (3.4.4)
+#16 35.41 Requirement already satisfied: idna<4,>=2.5 in /venv/lib/python3.12/site-packages (from requests->huggingface-hub>0.20->comfyui-manager) (3.11)
+#16 35.41 Requirement already satisfied: certifi>=2017.4.17 in /venv/lib/python3.12/site-packages (from requests->huggingface-hub>0.20->comfyui-manager) (2026.1.4)
+#16 35.46 Requirement already satisfied: pycparser in /venv/lib/python3.12/site-packages (from cffi>=1.4.1->pynacl>=1.4.0->PyGithub->comfyui-manager) (2.23)
+#16 35.53 Downloading comfyui_manager-4.0.5-py3-none-any.whl (1.0 MB)
+#16 35.71    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 5.8 MB/s eta 0:00:00
+#16 38.09 Installing collected packages: comfyui-manager
+#16 38.24 Successfully installed comfyui-manager-4.0.5
+#16 DONE 38.9s
+
+#17 [stage-0 13/16] RUN mkdir -p     /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large     /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints     /default-comfyui-bundle/ComfyUI/models/animatediff_models
+#17 DONE 0.2s
+
+#18 [stage-0 14/16] RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 180; kill $! 2>/dev/null || true
+#18 6.147 [START] Security scan
+#18 6.147 [DONE] Security scan
+#18 6.147 ## ComfyUI-Manager: installing dependencies done.
+#18 6.147 ** ComfyUI startup time: 2026-03-22 22:00:00.007
+#18 6.147 ** Platform: Linux
+#18 6.147 ** Python version: 3.12.3 (main, Jan  8 2026, 11:30:50) [GCC 13.3.0]
+#18 6.147 ** Python executable: /venv/bin/python3
+#18 6.147 ** ComfyUI Path: /default-comfyui-bundle/ComfyUI
+#18 6.147 ** ComfyUI Base Folder Path: /default-comfyui-bundle/ComfyUI
+#18 6.147 ** User directory: /default-comfyui-bundle/ComfyUI/user
+#18 6.147 ** ComfyUI-Manager config path: /default-comfyui-bundle/ComfyUI/user/__manager/config.ini
+#18 6.148 ** Log path: /default-comfyui-bundle/ComfyUI/user/comfyui.log
+#18 8.346 
+#18 8.346 Prestartup times for custom nodes:
+#18 8.346    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/rgthree-comfy
+#18 8.346    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3
+#18 8.346    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use
+#18 8.346    6.8 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager
+#18 8.346 
+#18 8.938 /venv/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+#18 8.938   import pynvml  # type: ignore[import]
+#18 10.73 WARNING: You need pytorch with cu130 or higher to use optimized CUDA operations.
+#18 10.73 Found comfy_kitchen backend cuda: {'available': False, 'disabled': True, 'unavailable_reason': 'CUDA not available on this system', 'capabilities': []}
+#18 10.73 Found comfy_kitchen backend eager: {'available': True, 'disabled': False, 'unavailable_reason': None, 'capabilities': ['apply_rope', 'apply_rope1', 'dequantize_nvfp4', 'dequantize_per_tensor_fp8', 'quantize_nvfp4', 'quantize_per_tensor_fp8', 'scaled_mm_nvfp4']}
+#18 10.74 Found comfy_kitchen backend triton: {'available': False, 'disabled': True, 'unavailable_reason': 'Neither CUDA nor XPU available on this system', 'capabilities': []}
+#18 10.74 Checkpoint files will always be loaded safely.
+#18 10.83 Total VRAM 63827 MB, total RAM 63827 MB
+#18 10.83 pytorch version: 2.6.0+cu126
+#18 10.83 Forcing FP32, if this improves things please report it.
+#18 10.83 Set vram state to: DISABLED
+#18 10.83 Device: cpu
+#18 11.06 Using sub quadratic optimization for attention, if you have memory or speed issues try using: --use-split-cross-attention
+#18 13.75 Python version: 3.12.3 (main, Jan  8 2026, 11:30:50) [GCC 13.3.0]
+#18 13.75 ComfyUI version: 0.18.1
+#18 13.75 comfy-aimdo version: 0.2.12
+#18 13.75 comfy-kitchen version: 0.2.8
+#18 13.75 ComfyUI frontend version: 1.41.21
+#18 13.75 [Prompt Server] web root: /venv/lib/python3.12/site-packages/comfyui_frontend_package/static
+#18 13.75 Asset seeder disabled
+#18 16.31 ### Loading: ComfyUI-Manager (V3.39.2)
+#18 16.31 [ComfyUI-Manager] network_mode: public
+#18 16.31 [ComfyUI-Manager] ComfyUI per-queue preview override detected (PR #11261). Manager's preview method feature is disabled. Use ComfyUI's --preview-method CLI option or 'Settings > Execution > Live preview method'.
+#18 16.38 ### ComfyUI Version: v0.18.1-1-gd49420b3 | Released on '2026-03-21'
+#18 16.61 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/alter-list.json
+#18 16.64 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/model-list.json
+#18 16.72 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/github-stats.json
+#18 16.84 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/extension-node-map.json
+#18 16.91 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json
+#18 17.29 NumExpr defaulting to 12 threads.
+#18 18.42 [34m[ComfyUI-Easy-Use] server: [0mv1.3.7 [92mLoaded[0m
+#18 18.42 [34m[ComfyUI-Easy-Use] web root: [0m/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use/web_version/v2 [92mLoaded[0m
+#18 18.48 
+#18 18.48 [92m[rgthree-comfy] Loaded 48 extraordinary nodes. 🎉[0m
+#18 18.48 
+#18 18.48 [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+#18 18.48 [0m
+#18 18.48 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using ckpts path: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts[0m
+#18 18.48 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
+#18 18.48 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
+#18 18.75 generated new fontManager
+#18 18.96 DWPose: Onnxruntime with acceleration providers detected
+#18 19.25 [AnimateDiffEvo] - [0;31mERROR[0m - No motion models found. Please download one and place in: ['/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved/models', '/default-comfyui-bundle/ComfyUI/models/animatediff_models']
+#18 20.22 FETCH ComfyRegistry Data: 5/133
+#18 22.95 [Crystools [0;32mINFO[0m] Crystools version: 1.27.4
+#18 23.01 [Crystools [0;32mINFO[0m] Platform release: 5.14.0-611.27.1.el9_7.x86_64
+#18 23.01 [Crystools [0;32mINFO[0m] JETSON: Not detected.
+#18 23.01 [Crystools [0;32mINFO[0m] CPU: Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz - Arch: x86_64 - OS: Linux 5.14.0-611.27.1.el9_7.x86_64
+#18 23.01 [Crystools [0;31mERROR[0m] Could not init pynvml (NVIDIA). NVML Shared Library Not Found
+#18 23.01 [Crystools [0;33mWARNING[0m] No GPU monitoring libraries available.
+#18 23.09 ComfyUI-GGUF: Partial torch compile only, consider updating pytorch
+#18 23.61 No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+#18 23.64 ### Loading: ComfyUI-Impact-Pack (V8.28.2)
+#18 24.14 [Impact Pack] Wildcard total size (0.00 MB) is within cache limit (50.00 MB). Using full cache mode.
+#18 24.14 [Impact Pack] Wildcards loading done.
+#18 24.14 ### Loading: ComfyUI-Impact-Subpack (V1.3.5)
+#18 24.15 [Impact Pack/Subpack] Using folder_paths to determine whitelist path: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt
+#18 24.15 [Impact Pack/Subpack] Ensured whitelist directory exists: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack
+#18 24.15 [Impact Pack/Subpack] Model whitelist file not found at: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt. 
+#18 24.15  >> An empty whitelist file will be created.
+#18 24.15  >> To allow unsafe loading for specific trusted legacy models (e.g., older .pt),
+#18 24.15  >> add their base filenames (one per line) to this file.
+#18 24.15 [Impact Pack/Subpack] Created empty whitelist file: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt
+#18 24.23 Creating new Ultralytics Settings v0.0.6 file ✅ 
+#18 24.23 View Ultralytics Settings with 'yolo settings' or at '/root/.config/Ultralytics/settings.json'
+#18 24.23 Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+#18 24.56 FETCH ComfyRegistry Data: 10/133
+#18 24.57 [Impact Subpack] ultralytics_bbox: /default-comfyui-bundle/ComfyUI/models/ultralytics/bbox
+#18 24.57 [Impact Subpack] ultralytics_segm: /default-comfyui-bundle/ComfyUI/models/ultralytics/segm
+#18 24.58 ### Loading: ComfyUI-Inspire-Pack (V1.23)
+#18 24.94 [94mtheUpsiders Logic Nodes: [92mLoaded[0m
+#18 25.35 Error loading module AILab_QwenVL_GGUF_PromptEnhancer: Failed to load shared library '/venv/lib/python3.12/site-packages/llama_cpp/lib/libggml.so': libcuda.so.1: cannot open shared object file: No such file or directory
+#18 26.63 /venv/lib/python3.12/site-packages/torch/amp/autocast_mode.py:266: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
+#18 26.63   warnings.warn(
+#18 26.74 [34m[ComfyUI-RMBG][0m v[93m3.0.0[0m | [93m43 nodes[0m [92mLoaded[0m
+#18 27.72 
+#18 27.72 [0;33m[ReActor][0m - [38;5;173mSTATUS[0m - [0;32mRunning v0.6.2-b1 in ComfyUI[0m
+#18 27.93 Torch version: 2.6.0+cu126
+#18 28.33 FETCH ComfyRegistry Data: 15/133
+#18 30.21 ⚡ SeedVR2 optimizations check: SageAttention ✅ | Flash Attention ✅ | Triton ✅
+#18 30.24 ⚠️ Memory check failed: No GPU backend available (CUDA/MPS) - No available backend!
+#18 30.28 /venv/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+#18 30.28   import pynvml  # type: ignore[import]
+#18 30.43 Error while calling comfy_entrypoint in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler: list index out of range
+#18 31.25 ------------------------------------------
+#18 31.25 [34mComfyroll Studio v1.76 : [92m 175 Nodes Loaded[0m
+#18 31.25 ------------------------------------------
+#18 31.25 ** For changes, please see patch notes at https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes/blob/main/Patch_Notes.md
+#18 31.25 ** For help, please see the wiki at https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes/wiki
+#18 31.25 ------------------------------------------
+#18 31.31 [34mFearnworks Custom Nodes: [92mLoading...[0m
+#18 31.31 [34m FEARNWORKS CUSTOM NODES: [92mAll nodes loaded successfully[0m
+#18 31.31 Making the "web\extensions\FizzleDorf" folder
+#18 31.31 Update to javascripts files detected
+#18 31.31 Copying Folder here to satisfy init, eventually I'll have stuff in here..txt to extensions folder
+#18 31.33 [34mFizzleDorf Custom Nodes: [92mLoaded[0m
+#18 32.10 FETCH ComfyRegistry Data: 20/133
+#18 32.38 [[94mComfyUI-Rife-Tensorrt[0m|[92mINFO[0m] - [92mSuccessfully loaded configuration from load_rife_config.json[0m
+#18 32.42 Original USDU script not found, downloading it from https://github.com/Coyote-A/ultimate-upscale-for-automatic1111
+#18 33.24 Original USDU script downloaded successfully
+#18 33.29 USDU batch patches applied successfully.
+#18 33.29 USDU batch patches applied successfully.
+#18 33.33 Base directory: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip
+#18 33.33 Checkpoints path: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#18 33.33 Model path: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/wav2lip_gan.pth
+#18 33.33 Traceback (most recent call last):
+#18 33.33   File "/default-comfyui-bundle/ComfyUI/nodes.py", line 2227, in load_custom_node
+#18 33.33     module_spec.loader.exec_module(module)
+#18 33.33   File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+#18 33.33   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+#18 33.33   File "/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/__init__.py", line 1, in <module>
+#18 33.33     from .wav2lip import Wav2Lip, LoadAudio
+#18 33.33   File "/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/wav2lip.py", line 36, in <module>
+#18 33.33     assert model_exists, f"Model {wav2lip_model_file} not found in {checkpoints_path}"
+#18 33.33            ^^^^^^^^^^^^
+#18 33.33 AssertionError: Model wav2lip_gan.pth not found in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#18 33.33 
+#18 33.33 Cannot import /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip module for custom nodes: Model wav2lip_gan.pth not found in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#18 33.60 Config file created.
+#18 33.90 Using sub quadratic optimization for attention, if you have memory or speed issues try using: --use-split-cross-attention
+#18 33.99 (RES4LYF) Init
+#18 33.99 (RES4LYF) Importing beta samplers.
+#18 34.10 (RES4LYF) Importing legacy samplers.
+#18 34.28 @@device:cpu
+#18 34.28 @@device:cpu
+#18 34.32 [0;33m[ReActor][0m - [38;5;173mSTATUS[0m - [0;32mRunning v0.6.2-b1 in ComfyUI[0m
+#18 34.51 Torch version: 2.6.0+cu126
+#18 35.72 FETCH ComfyRegistry Data: 25/133
+#18 36.28 PyTorch version 2.6.0+cu126 available.
+#18 36.28 Polars version 1.39.3 available.
+#18 39.38 FETCH ComfyRegistry Data: 30/133
+#18 42.46 libportaudio2 is already installed.
+#18 43.59 llama-cpp-python installed
+#18 43.65 FETCH ComfyRegistry Data: 35/133
+#18 44.43 Successfully uninstalled discord.py
+#18 47.50 FETCH ComfyRegistry Data: 40/133
+#18 49.09 Successfully installed py-cord[voice]
+#18 49.14 [K✨ [config.json] 文件不存在，创建默认配置...
+#18 49.14 [K✨ [system_prompts.json] 文件不存在，创建默认配置...
+#18 49.15 [K✨ [active_prompts.json] 文件不存在，创建默认配置...
+#18 49.15 [K✨ [tags_user.json] 文件不存在，创建默认配置...
+#18 49.15 [K✨ [kontext_presets.json] 文件不存在，创建默认配置...
+#18 49.15 [K✨ ✨ 检测到全新环境，已基于模板创建初始标签文件: 默认标签.csv
+#18 49.15 [K✨ [用户标签.csv] 数据迁移完成
+#18 49.20 ✨提示词小助手 V2.0.4 已启动
+#18 50.13 [34mWAS Node Suite: [0mCreated default conf file at `/default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json`.[0m
+#18 51.07 [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m
+#18 51.07 [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `/default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m
+#18 51.55 FETCH ComfyRegistry Data: 45/133
+#18 51.95 [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m
+#18 51.95 
+#18 51.95 	[3m[93m"Art is the language of the heart and the window to the soul."[0m[3m - Unknown[0m
+#18 51.95 
+#18 51.96 
+#18 51.96 Import times for custom nodes:
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/websocket_image_save.py
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_OIDN_Denoiser
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-int-and-float
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LatentClamp
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI--Wan22FirstLastFrameToVideoLatent
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUi-Scale-Image-to-Total-Pixels-Advanced
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Simple-VFI
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Logic
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Unload-Model
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-use-everywhere
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfy-image-saver
+#18 51.96    0.0 seconds (IMPORT FAILED): /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-image-picker
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_FearnworksNodes
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/sd-dynamic-thresholding
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-InpaintEasy
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Unload-Models
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-image-filter
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_RIFE_TensorRT_Auto
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Latent-Modifiers
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-UltimateSDUpscale-GGUF
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_TTP_Toolset
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-VFI
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-MelBandRoFormer
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-instantId-faceswap
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyMath
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Advanced-Latent-Control
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Derfuu_ComfyUI_ModdedNodes
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Custom-Scripts
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-OIDN
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-IPAdapter-Flux
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-GGUF
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_FizzNodes
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-YarvixPA
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dream-video-batches
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_QwenVL
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_essentials
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-QwenVL
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dream-project
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_Simple_Qwen3-VL-gguf
+#18 51.96    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-WanVideoStartEndFrames
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dynamicprompts
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/rgthree-comfy
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-liveportrait
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_ExtraModels
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/OneButtonPrompt
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_segment_anything
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LTXVideo
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Inspire-Pack
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_Comfyroll_CustomNodes
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_prompt_assistant
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/facerestore_cf
+#18 51.96    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite
+#18 51.96    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved
+#18 51.96    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-KJNodes
+#18 51.96    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_face_restorer
+#18 51.96    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager
+#18 51.96    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-reactor-node
+#18 51.96    0.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_LayerStyle
+#18 51.96    0.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LogicUtils
+#18 51.96    0.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Impact-Subpack
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-WanVideoWrapper
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/RES4LYF
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Crystools
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-GPENO
+#18 51.96    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Rife-Tensorrt
+#18 51.96    0.7 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_InstantID
+#18 51.96    0.9 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_UltimateSDUpscale
+#18 51.96    1.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-ReActor
+#18 51.96    1.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-RMBG
+#18 51.96    1.9 seconds (IMPORT FAILED): /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler
+#18 51.96    2.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use
+#18 51.96    2.6 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui
+#18 51.96    3.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Copilot
+#18 51.96   14.6 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_LLM_party
+#18 51.96 
+#18 51.96 Context impl SQLiteImpl.
+#18 51.96 Will assume non-transactional DDL.
+#18 51.97 Context impl SQLiteImpl.
+#18 51.97 Will assume non-transactional DDL.
+#18 51.98 Running upgrade  -> 0001_assets, Initial assets schema
+#18 51.98 Revision ID: 0001_assets
+#18 51.98 Revises: None
+#18 51.98 Create Date: 2025-12-10 00:00:00
+#18 52.09 Running upgrade 0001_assets -> 0002_merge_to_asset_references, Merge AssetInfo and AssetCacheState into unified asset_references table.
+#18 52.18 Running upgrade 0002_merge_to_asset_references -> 0003_add_metadata_job_id, Add system_metadata and job_id columns to asset_references.
+#18 52.18 Change preview_id FK from assets.id to asset_references.id.
+#18 52.21 Database upgraded from None to 0003_add_metadata_job_id
+#18 52.29 Starting server
+#18 52.29 
+#18 52.29 To see the GUI go to: http://0.0.0.0:8188
+#18 52.29 To see the GUI go to: http://[::]:8188
+#18 55.40 FETCH ComfyRegistry Data: 50/133
+#18 58.95 FETCH ComfyRegistry Data: 55/133
+#18 62.80 FETCH ComfyRegistry Data: 60/133
+#18 66.52 FETCH ComfyRegistry Data: 65/133
+#18 70.40 FETCH ComfyRegistry Data: 70/133
+#18 74.23 FETCH ComfyRegistry Data: 75/133
+#18 78.34 FETCH ComfyRegistry Data: 80/133
+#18 81.89 FETCH ComfyRegistry Data: 85/133
+#18 85.66 FETCH ComfyRegistry Data: 90/133
+#18 89.22 FETCH ComfyRegistry Data: 95/133
+#18 93.59 FETCH ComfyRegistry Data: 100/133
+#18 98.06 FETCH ComfyRegistry Data: 105/133
+#18 101.9 FETCH ComfyRegistry Data: 110/133
+#18 105.5 FETCH ComfyRegistry Data: 115/133
+#18 109.1 FETCH ComfyRegistry Data: 120/133
+#18 112.9 FETCH ComfyRegistry Data: 125/133
+#18 117.6 FETCH ComfyRegistry Data: 130/133
+#18 120.2 FETCH ComfyRegistry Data [DONE]
+#18 120.4 [ComfyUI-Manager] default cache updated: https://api.comfy.org/nodes
+#18 120.5 FETCH DATA from: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json [DONE]
+#18 120.7 [ComfyUI-Manager] All startup tasks have been completed.
+#18 DONE 180.4s
+
+#19 [stage-0 15/16] RUN cat > /tmp/update_config.py << 'EOF'
+#19 DONE 0.2s
+
+#20 [stage-0 16/16] RUN python3 /tmp/update_config.py && rm /tmp/update_config.py
+#20 0.227 Config updated: custom node installation enabled
+#20 0.227 {
+#20 0.227   "Comfy.NodeLibrary.Bookmarks.V2": [],
+#20 0.227   "Comfy.UseNewMenu": "Top",
+#20 0.227   "Comfy.NodeLibrary.EnableInstall": true
+#20 0.227 }
+#20 DONE 0.2s
+
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 19.1s done
+#21 writing image sha256:525b2158f88523166afcdd96f25fd50f14acbc1f2e1107749dc78c3dbfc8706d done
+#21 naming to docker.io/library/sd-worker:staging done
+#21 DONE 19.1s

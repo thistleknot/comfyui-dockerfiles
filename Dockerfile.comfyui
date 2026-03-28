@@ -4,6 +4,7 @@ ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
+ENV PYOPENGL_PLATFORM=egl
 WORKDIR /default-comfyui-bundle
 
 # Layer 1: Clone ComfyUI + Manager
@@ -60,12 +61,6 @@ RUN cd ComfyUI && \
     chmod -R 755 /default-comfyui-bundle/ComfyUI
 WORKDIR /default-comfyui-bundle/ComfyUI
 
-# Layer 3.5: Re-ensure problematic packages are installed AFTER custom nodes copied
-# - pilmoji/dghs-imgutils: prevent broken 2.0.5 build trigger
-# - opencv-contrib-python 4.13: provides guidedFilter for LayerStyle
-# - pycocotools: required by ComfyUI-RMBG SAM3 segment nodes
-# - onnxruntime-gpu: force last-write to override any CPU-only onnxruntime from node requirements
-# - SAM3 prestartup patch: comfy_env not available at prestartup time, wrap in try/except
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --no-deps pilmoji==2.0.4 && \
     /venv/bin/pip install --no-deps dghs-imgutils && \
@@ -73,6 +68,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
     /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
     /venv/bin/pip install --no-deps onnxruntime-gpu && \
+    /venv/bin/pip install --cache-dir=/pip-cache comfyui-manager && \
     python3 - << 'EOF'
 import pathlib
 p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")

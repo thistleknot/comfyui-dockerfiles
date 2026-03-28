@@ -1,0 +1,43 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.custom_nodes
+#1 transferring dockerfile: 7.79kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/ml-base:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0 1/7] FROM docker.io/library/ml-base:cu126-pt26
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 4.05kB done
+#5 DONE 0.0s
+
+#6 [stage-0 5/7] RUN --mount=type=cache,target=/pip-cache,id=pip-external     mkdir -p /tmp/requirements &&     echo "=== Fetching requirements.txt from custom node repos ===" &&     while IFS= read -r repo || [ -n "$repo" ]; do         [ -z "$repo" ] && continue;         case "$repo" in #*) continue ;; esac;         node_name=$(basename "$repo");         if curl -fsSL --retry 3 --retry-delay 2             "https://raw.githubusercontent.com/${repo}/main/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${repo} (main)";         elif curl -fsSL --retry 3 --retry-delay 2             "https://raw.githubusercontent.com/${repo}/master/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${repo} (master)";         else             echo "? ${repo} (no requirements.txt)";         fi;     done < /tmp/custom_node_repos.txt &&     echo "=== Fetching requirements.txt from special custom nodes ===" &&     while IFS= read -r git_url || [ -n "$git_url" ]; do         [ -z "$git_url" ] && continue;         case "$git_url" in #*) continue ;; esac;         node_name=$(basename "$git_url" .git);         raw_url=$(echo "$git_url" | sed -e 's|github.com/|raw.githubusercontent.com/|' -e 's|\.git$||');         if curl -fsSL --retry 3 --retry-delay 2             "${raw_url}/main/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${git_url} (main)";         elif curl -fsSL --retry 3 --retry-delay 2             "${raw_url}/master/requirements.txt"             -o /tmp/requirements/${node_name}.txt.tmp 2>/dev/null; then             mv /tmp/requirements/${node_name}.txt.tmp /tmp/requirements/${node_name}.txt;             echo "? ${git_url} (master)";         else             echo "? ${git_url} (no requirements.txt)";         fi;     done < /tmp/special_custom_nodes.txt &&     echo "=== Merging requirements ===" &&     cat /tmp/requirements/*.txt 2>/dev/null |     grep -v '^#' | grep -v '^$' | grep -v '^-' | sed 's/#.*//' | sed 's/[[:space:]]*$//' |     sort | uniq > /tmp/all_requirements.txt &&     echo "=== Combined $(wc -l < /tmp/all_requirements.txt) unique package requirements ===" &&     if [ -s /tmp/all_requirements.txt ]; then         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/all_requirements.txt ||         (while IFS= read -r pkg; do              /venv/bin/uv pip install "$pkg" ||              /venv/bin/uv pip install "${pkg%%[>=<~!]*}";          done < /tmp/all_requirements.txt);     fi
+#6 CACHED
+
+#7 [stage-0 3/7] COPY special_custom_nodes.txt /tmp/special_custom_nodes.txt
+#7 CACHED
+
+#8 [stage-0 6/7] RUN mkdir -p /custom_nodes_staged /install_logs &&     echo "=== Cloning Custom Nodes ===" | tee /install_logs/install.log &&     while IFS= read -r repo || [ -n "$repo" ]; do         [ -z "$repo" ] && continue;         case "$repo" in #*) continue ;; esac;         node_name=$(basename "$repo");         echo "Cloning: $repo" | tee -a /install_logs/install.log;         git clone --depth 1 https://github.com/${repo}.git /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log ||         echo "Failed: $repo" | tee -a /install_logs/failed_clones.txt;     done < /tmp/custom_node_repos.txt &&     echo "=== Cloning Special Custom Nodes ===" | tee -a /install_logs/install.log &&     while IFS= read -r git_url || [ -n "$git_url" ]; do         [ -z "$git_url" ] && continue;         case "$git_url" in #*) continue ;; esac;         node_name=$(basename "$git_url" .git);         echo "Cloning: $git_url -> $node_name" | tee -a /install_logs/install.log;         git clone --depth 1 "$git_url" /custom_nodes_staged/${node_name} 2>&1 | tee -a /install_logs/clone.log ||         echo "Failed: $git_url" | tee -a /install_logs/failed_clones.txt;     done < /tmp/special_custom_nodes.txt
+#8 CACHED
+
+#9 [stage-0 2/7] COPY custom_node_repos.txt /tmp/custom_node_repos.txt
+#9 CACHED
+
+#10 [stage-0 4/7] RUN cat > /tmp/custom_node_special_pulls.txt << 'EOF'
+#10 CACHED
+
+#11 [stage-0 7/7] RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then         echo "=== Processing Special Pulls ===" | tee -a /install_logs/install.log;         while IFS='|' read -r repo ref type || [ -n "$repo" ]; do             [ -z "$repo" ] && continue;             case "$repo" in #*) continue ;; esac;             node_name=$(basename "$repo");             target_dir="/custom_nodes_staged/${node_name}";             echo "Processing special pull: ${repo} (${type}: ${ref})" | tee -a /install_logs/install.log;             if [ -d "$target_dir" ]; then                 cd "$target_dir" &&                 case "$type" in                     pr)                         echo "Fetching PR #${ref}" | tee -a /install_logs/install.log;                         git fetch origin pull/${ref}/head:pr-${ref} &&                         git checkout pr-${ref} &&                         echo "? Checked out PR #${ref}" | tee -a /install_logs/install.log;                         ;;                     commit)                         echo "Fetching commit ${ref}" | tee -a /install_logs/install.log;                         git fetch --depth=1 origin ${ref} &&                         git checkout ${ref} &&                         echo "? Checked out commit ${ref}" | tee -a /install_logs/install.log;                         ;;                     branch)                         echo "Switching to branch ${ref}" | tee -a /install_logs/install.log;                         git fetch origin ${ref} &&                         git checkout ${ref} &&                         echo "? Checked out branch ${ref}" | tee -a /install_logs/install.log;                         ;;                     *)                         echo "? Unknown type: ${type}" | tee -a /install_logs/failed_clones.txt;                         ;;                 esac || echo "Failed special pull: ${repo}" | tee -a /install_logs/failed_clones.txt;             else                 echo "? Node not found, cloning with special ref" | tee -a /install_logs/install.log;                 git clone https://github.com/${repo}.git "$target_dir" 2>&1 | tee -a /install_logs/clone.log &&                 cd "$target_dir" &&                 case "$type" in                     pr) git fetch origin pull/${ref}/head:pr-${ref} && git checkout pr-${ref} ;;                     commit) git fetch origin ${ref} && git checkout ${ref} ;;                     branch) git fetch origin ${ref} && git checkout ${ref} ;;                 esac || echo "Failed: ${repo}" | tee -a /install_logs/failed_clones.txt;             fi;         done < /tmp/custom_node_special_pulls.txt;     else         echo "=== No special pulls configured ===" | tee -a /install_logs/install.log;     fi
+#11 CACHED
+
+#12 exporting to image
+#12 exporting layers done
+#12 writing image sha256:676c2012c6eca2854ca1dd9b3fc10bddabaeae4bfd471383cc45b9c4bdecd5ff done
+#12 naming to docker.io/library/custom-nodes-ready:cu126-pt26 done
+#12 DONE 0.0s
