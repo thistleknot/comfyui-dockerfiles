@@ -11,7 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     portaudio19-dev libportaudio2 \
     ffmpeg libsm6 libxext6 \
     libtbb12 \
-    libegl-mesa0 libgl1-mesa-dri && \
+    libegl-mesa0 libgl1-mesa-dri \
+    libegl1 libosmesa6 libopengl0 && \
+    ln -sf /usr/lib/x86_64-linux-gnu/libEGL.so.1 /usr/lib/x86_64-linux-gnu/libEGL.so.0 && \
+    ldconfig && \
     rm -rf /var/lib/apt/lists/*
 
 # Layer 1: PyTorch 2.6.0 + UV

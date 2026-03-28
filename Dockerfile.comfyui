@@ -5,6 +5,7 @@ ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
 ENV PYOPENGL_PLATFORM=egl
+ENV PYOPENGL_PLATFORM=osmesa
 WORKDIR /default-comfyui-bundle
 
 # Layer 1: Clone ComfyUI + Manager
@@ -113,9 +114,4 @@ ENTRYPOINT ["/bin/bash", "-c", "\
   source /venv/bin/activate && \
   mkdir -p /default-comfyui-bundle/ComfyUI/models/tensorrt/rife && \
   python3 main.py --listen --lowvram --force-fp32 --disable-cuda-malloc --reserve-vram 2.0 --use-pytorch-cross-attention"]
-#docker run -it --rm --gpus all -p 8188:8188 \
-  #-v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models \
-  #-v /mnt/external/models/depth-anything/Depth-Anything-V2-Large:/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large \
-  #-v /mnt/external/models/lipsync:/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints \
-  #-v /mnt/external/models/animatediff_models:/default-comfyui-bundle/ComfyUI/models/animatediff_models \
-  #sd-worker:latest
+#docker run -it --rm --gpus all --device /dev/dri/card0 --device /dev/dri/card1 --device /dev/dri/renderD128 --device /dev/dri/renderD129 -p 8188:8188 -v /mnt/external/models:/default-comfyui-bundle/ComfyUI/models -v /mnt/external/models/depth-anything/Depth-Anything-V2-Large:/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large -v /mnt/external/models/lipsync:/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints -v /mnt/external/models/animatediff_models:/default-comfyui-bundle/ComfyUI/models/animatediff_models sd-worker:latest

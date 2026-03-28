@@ -116,3 +116,4 @@ TTPlanetPig/Comfyui_TTP_Toolset
 YarvixPA/ComfyUI-YarvixPA
 YarvixPA/ComfyUI-NeuralMedia
 Windecay/ComfyUI-ReservedVRAM
+twri/sdxl_prompt_styler
