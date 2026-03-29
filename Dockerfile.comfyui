@@ -84,6 +84,12 @@ if p.exists():
     p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
 EOF
 
+# Patch OIDN nodes: squeeze batch dimension before passing to oidn
+RUN sed -i 's/oidn.SetSharedFilterImage(self.filter, "color", input_buf/input_buf = input_buf.squeeze(0) if input_buf.ndim == 4 else input_buf\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf/' \
+        custom_nodes/Comfyui_OIDN_Denoiser/oidn_denoiser.py 2>/dev/null || true && \
+    sed -i 's/oidn.SetSharedFilterImage(self.filter, "output", self.result/self.result = self.result.squeeze(0) if self.result.ndim == 4 else self.result\n        oidn.SetSharedFilterImage(self.filter, "output", self.result/' \
+        custom_nodes/ComfyUI-OIDN/inference.py 2>/dev/null || true
+
 # Layer 4: Ensure mount point directories exist
 RUN mkdir -p \
     /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large \
