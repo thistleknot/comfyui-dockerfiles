@@ -117,3 +117,4 @@ decord
 pycocotools
 PyOpenGL-accelerate
 diskcache
+surrealist
