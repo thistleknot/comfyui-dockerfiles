@@ -50,6 +50,9 @@ file_newer_than_image() {
   return 1
 }
 
+# Ensure prebuilt dir exists (COPY in Dockerfile.base requires it)
+mkdir -p prebuilt
+
 # Run compatibility analysis only if repo list changed
 RUN_ANALYSIS=false
 if [ ! -f "custom_node_repos.txt" ]; then
@@ -85,6 +88,15 @@ elif [ -f "llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl" ] && \
      file_newer_than_image "llama_cpp_python-0.3.18-cp312-cp312-linux_x86_64.whl" "${ML_BASE_IMAGE}"; then
   echo "[1/3] Rebuilding base (llama wheel changed)"
   REBUILD_BASE=true
+elif [ -f "prebuilt/llama_cpp.commit" ]; then
+  STORED_COMMIT=$(cat prebuilt/llama_cpp.commit)
+  REMOTE_COMMIT=$(git ls-remote https://github.com/JamePeng/llama-cpp-python HEAD 2>/dev/null | cut -f1)
+  if [ -n "$REMOTE_COMMIT" ] && [ "$STORED_COMMIT" != "$REMOTE_COMMIT" ]; then
+    echo "[1/3] Rebuilding base (llama-cpp-python commit changed: ${STORED_COMMIT:0:8} ? ${REMOTE_COMMIT:0:8})"
+    REBUILD_BASE=true
+  else
+    echo "[1/3] Skipping base (unchanged since $(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
+  fi
 else
   echo "[1/3] Skipping base (unchanged since $(docker image inspect ${ML_BASE_IMAGE} --format='{{.Created}}' | cut -d'T' -f1))"
 fi
@@ -97,6 +109,21 @@ if [ "$REBUILD_BASE" = true ]; then
     echo "ERROR: Base build failed. Check ${LOGS_DIR}/base_${TIMESTAMP}.log"
     exit $BUILD_EXIT_CODE
   fi
+
+  echo "=== Exporting prebuilt artifacts ==="
+  mkdir -p prebuilt
+  docker run --rm --entrypoint bash "${ML_BASE_IMAGE}" -c \
+    "tar czf - /venv/lib/python3.12/site-packages/llama_cpp /opt/llama.cpp" \
+    > prebuilt/llama_cpp.tar.gz
+  echo "  ? llama_cpp exported ($(du -sh prebuilt/llama_cpp.tar.gz | cut -f1))"
+  docker run --rm --entrypoint bash "${ML_BASE_IMAGE}" -c \
+    "tar czf - /venv/lib/python3.12/site-packages/flash_attn 2>/dev/null || echo MISSING" \
+    > prebuilt/flash_attn.tar.gz 2>/dev/null && \
+    echo "  ? flash_attn exported ($(du -sh prebuilt/flash_attn.tar.gz | cut -f1))" || \
+    echo "  ? flash_attn not found, skipping"
+  git ls-remote https://github.com/JamePeng/llama-cpp-python HEAD 2>/dev/null | cut -f1 > prebuilt/llama_cpp.commit
+  echo "  ? commit pinned: $(cat prebuilt/llama_cpp.commit)"
+  echo "=== Prebuilt artifacts saved to prebuilt/ ==="
 fi
 
 # Stage 2: Custom nodes
@@ -138,19 +165,19 @@ echo "[3/3] Checking ComfyUI layer..."
 REBUILD_COMFY=false
 
 if ! docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
-  echo "  → Building (image missing)"
+  echo "  ? Building (image missing)"
   REBUILD_COMFY=true
 elif [ "$REBUILD_NODES" = true ]; then
-  echo "  → Rebuilding (custom nodes changed)"
+  echo "  ? Rebuilding (custom nodes changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "Dockerfile.comfyui" "${FINAL_IMAGE}"; then
-  echo "  → Rebuilding (Dockerfile.comfyui changed)"
+  echo "  ? Rebuilding (Dockerfile.comfyui changed)"
   REBUILD_COMFY=true
 elif file_newer_than_image "extra_packages.txt" "${FINAL_IMAGE}"; then
-  echo "  → Rebuilding (extra_packages.txt changed)"
+  echo "  ? Rebuilding (extra_packages.txt changed)"
   REBUILD_COMFY=true
 else
-  echo "  → Rebuilding anyway (always fresh)"
+  echo "  ? Rebuilding anyway (always fresh)"
   REBUILD_COMFY=true
 fi
 
@@ -173,18 +200,15 @@ if [ "$REBUILD_COMFY" = true ]; then
   
   echo "[SWITCH] Swapping images (zero-downtime)..."
   
-  # Remove old production image
   if docker image inspect "${FINAL_IMAGE}" >/dev/null 2>&1; then
-    echo "  → Removing old production image"
+    echo "  ? Removing old production image"
     docker rmi "${FINAL_IMAGE}" 2>/dev/null || true
   fi
   
-  # Tag staging as production
-  echo "  → Promoting staging → production"
+  echo "  ? Promoting staging ? production"
   docker tag "${STAGING_IMAGE}" "${FINAL_IMAGE}"
   
-  # Clean up staging tag
-  echo "  → Cleaning up staging tag"
+  echo "  ? Cleaning up staging tag"
   docker rmi "${STAGING_IMAGE}" 2>/dev/null || true
   
   echo "[DONE] Image swapped successfully"
