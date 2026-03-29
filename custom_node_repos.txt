@@ -117,3 +117,5 @@ YarvixPA/ComfyUI-YarvixPA
 YarvixPA/ComfyUI-NeuralMedia
 Windecay/ComfyUI-ReservedVRAM
 twri/sdxl_prompt_styler
+kijai/ComfyUI-Florence2
+un-seen/comfyui-tensorops
