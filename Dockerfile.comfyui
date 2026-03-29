@@ -84,11 +84,23 @@ if p.exists():
     p.write_text('"""ComfyUI-SAM3 Prestartup Script."""\ntry:\n    from comfy_env import setup_env, copy_files\n    setup_env()\n    from pathlib import Path\n    SCRIPT_DIR = Path(__file__).resolve().parent\n    COMFYUI_DIR = SCRIPT_DIR.parent.parent\n    copy_files(SCRIPT_DIR / "assets", COMFYUI_DIR / "input")\nexcept Exception:\n    pass\n')
 EOF
 
-# Patch OIDN nodes: squeeze batch dimension before passing to oidn
-RUN sed -i 's/oidn.SetSharedFilterImage(self.filter, "color", input_buf/input_buf = input_buf.squeeze(0) if input_buf.ndim == 4 else input_buf\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf/' \
-        custom_nodes/Comfyui_OIDN_Denoiser/oidn_denoiser.py 2>/dev/null || true && \
-    sed -i 's/oidn.SetSharedFilterImage(self.filter, "output", self.result/self.result = self.result.squeeze(0) if self.result.ndim == 4 else self.result\n        oidn.SetSharedFilterImage(self.filter, "output", self.result/' \
-        custom_nodes/ComfyUI-OIDN/inference.py 2>/dev/null || true
+# Patch OIDN nodes: fix shape and contiguity issues
+RUN python3 - << 'EOF'
+import pathlib
+
+p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_OIDN_Denoiser/oidn_denoiser.py")
+if p.exists():
+    txt = p.read_text()
+    old = '    def denoise(self, img_np):\n        h, w, c = img_np.shape\n\n        # Normalize if necessary\n        if img_np.max() > 1.0:\n            img_np = img_np / 255.0\n\n        input_buf = img_np.astype(np.float32)\n        output_buf = np.empty_like(input_buf)\n\n        input_buf = input_buf.squeeze(0) if input_buf.ndim == 4 else input_buf\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf, oidn.FORMAT_FLOAT3, w, h)\n        oidn.SetSharedFilterImage(self.filter, "output", output_buf, oidn.FORMAT_FLOAT3, w, h)'
+    new = '    def denoise(self, img_np):\n        if img_np.ndim == 4:\n            img_np = img_np.squeeze(0)\n        h, w, c = img_np.shape\n        if img_np.max() > 1.0:\n            img_np = img_np / 255.0\n        input_buf = np.ascontiguousarray(img_np.astype(np.float32))\n        output_buf = np.ascontiguousarray(np.empty_like(input_buf))\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf, oidn.FORMAT_FLOAT3, w, h)\n        oidn.SetSharedFilterImage(self.filter, "output", output_buf, oidn.FORMAT_FLOAT3, w, h)'
+    if old in txt:
+        p.write_text(txt.replace(old, new))
+        print("Patched Comfyui_OIDN_Denoiser")
+    else:
+        print("WARNING: Comfyui_OIDN_Denoiser patch pattern not found")
+else:
+    print("Comfyui_OIDN_Denoiser not found, skipping")
+EOF
 
 # Layer 4: Ensure mount point directories exist
 RUN mkdir -p \
