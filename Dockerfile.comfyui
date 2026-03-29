@@ -4,7 +4,6 @@ ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
-ENV PYOPENGL_PLATFORM=egl
 ENV PYOPENGL_PLATFORM=osmesa
 WORKDIR /default-comfyui-bundle
 
@@ -14,10 +13,18 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
 
 # Layer 1.5: Install packages requiring special handling (broken source dists)
 COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+COPY prebuilt/ /tmp/prebuilt/
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     if [ -s /tmp/special_logic_requirements.txt ]; then \
-        grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt && \
-        /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt; \
+        grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' | grep -v 'flash-attn' > /tmp/special_clean.txt && \
+        /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/special_clean.txt; \
+    fi && \
+    if [ -f /tmp/prebuilt/flash_attn.tar.gz ] && [ -s /tmp/prebuilt/flash_attn.tar.gz ]; then \
+        echo "=== Using prebuilt flash_attn ===" && \
+        tar xzf /tmp/prebuilt/flash_attn.tar.gz -C /; \
+    else \
+        /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
+        echo "? flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt; \
     fi
 
 # Layer 2: Install ALL requirements (excluding nvdiffrast)
