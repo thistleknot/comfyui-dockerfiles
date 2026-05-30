@@ -119,3 +119,4 @@ Windecay/ComfyUI-ReservedVRAM
 twri/sdxl_prompt_styler
 kijai/ComfyUI-Florence2
 un-seen/comfyui-tensorops
+WhatDreamsCost/WhatDreamsCost-ComfyUI

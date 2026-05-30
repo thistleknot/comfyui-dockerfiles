@@ -1,0 +1,103 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 6.51kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 3.13kB done
+#4 DONE 0.0s
+
+#5 [stage-0  1/16] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#5 DONE 0.1s
+
+#6 [stage-0  2/16] WORKDIR /default-comfyui-bundle
+#6 DONE 0.0s
+
+#7 [stage-0  3/16] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#7 0.156 Cloning into 'ComfyUI'...
+#7 43.34 Cloning into 'ComfyUI-Manager'...
+#7 DONE 71.7s
+
+#8 [stage-0  4/16] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#8 DONE 0.0s
+
+#9 [stage-0  5/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi
+#9 0.240 Using Python 3.12.3 environment at: /venv
+#9 3.813   × Failed to build `flash-attn==2.6.3`
+#9 3.813   ├─▶ The build backend returned an error
+#9 3.813   ╰─▶ Call to `setuptools.build_meta:__legacy__.build_wheel` failed (exit
+#9 3.813       status: 1)
+#9 3.813 
+#9 3.813       [stderr]
+#9 3.813       /pip-cache/builds-v0/.tmp9BFUq1/lib/python3.12/site-packages/setuptools/_vendor/wheel/bdist_wheel.py:4:
+#9 3.813       FutureWarning: The 'wheel' package is no longer the canonical location
+#9 3.813       of the 'bdist_wheel' command, and will be removed in a future release.
+#9 3.813       Please update to setuptools v70.1 or later which contains an integrated
+#9 3.813       version of this command.
+#9 3.813         warn(
+#9 3.813       Traceback (most recent call last):
+#9 3.813         File "<string>", line 14, in <module>
+#9 3.813         File
+#9 3.813       "/pip-cache/builds-v0/.tmp9BFUq1/lib/python3.12/site-packages/setuptools/build_meta.py",
+#9 3.813       line 333, in get_requires_for_build_wheel
+#9 3.813           return self._get_build_requires(config_settings, requirements=[])
+#9 3.813                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#9 3.813         File
+#9 3.813       "/pip-cache/builds-v0/.tmp9BFUq1/lib/python3.12/site-packages/setuptools/build_meta.py",
+#9 3.813       line 301, in _get_build_requires
+#9 3.813           self.run_setup()
+#9 3.813         File
+#9 3.813       "/pip-cache/builds-v0/.tmp9BFUq1/lib/python3.12/site-packages/setuptools/build_meta.py",
+#9 3.813       line 520, in run_setup
+#9 3.813           super().run_setup(setup_script=setup_script)
+#9 3.813         File
+#9 3.813       "/pip-cache/builds-v0/.tmp9BFUq1/lib/python3.12/site-packages/setuptools/build_meta.py",
+#9 3.813       line 317, in run_setup
+#9 3.813           exec(code, locals())
+#9 3.813         File "<string>", line 21, in <module>
+#9 3.813       ModuleNotFoundError: No module named 'torch'
+#9 3.813 
+#9 3.813       hint: This error likely indicates that `flash-attn@2.6.3` depends
+#9 3.813       on `torch`, but doesn't declare it as a build dependency. If
+#9 3.813       `flash-attn` is a first-party package, consider adding `torch`
+#9 3.813       to its `build-system.requires`. Otherwise, either add it to your
+#9 3.813       `pyproject.toml` under:
+#9 3.813 
+#9 3.813       [tool.uv.extra-build-dependencies]
+#9 3.813       flash-attn = ["torch"]
+#9 3.813 
+#9 3.813       or `uv pip install torch` into the environment and re-run with
+#9 3.813       `--no-build-isolation`.
+#9 ERROR: process "/bin/sh -c if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi" did not complete successfully: exit code: 1
+------
+ > [stage-0  5/16] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi:
+3.813       on `torch`, but doesn't declare it as a build dependency. If
+3.813       `flash-attn` is a first-party package, consider adding `torch`
+3.813       to its `build-system.requires`. Otherwise, either add it to your
+3.813       `pyproject.toml` under:
+3.813 
+3.813       [tool.uv.extra-build-dependencies]
+3.813       flash-attn = ["torch"]
+3.813 
+3.813       or `uv pip install torch` into the environment and re-run with
+3.813       `--no-build-isolation`.
+------
+Dockerfile.comfyui:17
+--------------------
+  16 |     COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+  17 | >>> RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+  18 | >>>     if [ -s /tmp/special_logic_requirements.txt ]; then \
+  19 | >>>         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt && \
+  20 | >>>         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt; \
+  21 | >>>     fi
+  22 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache -r /tmp/special_clean.txt;     fi" did not complete successfully: exit code: 1

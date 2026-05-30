@@ -1,0 +1,385 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.comfyui
+#1 transferring dockerfile: 8.58kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/custom-nodes-ready:cu126-pt26
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0  1/18] FROM docker.io/library/custom-nodes-ready:cu126-pt26
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 610B done
+#5 DONE 0.0s
+
+#6 [stage-0  5/18] COPY prebuilt/ /tmp/prebuilt/
+#6 CACHED
+
+#7 [stage-0 11/18] RUN cd ComfyUI &&     mkdir -p         models/checkpoints models/vae models/loras models/embeddings         models/controlnet models/clip models/unet models/upscale_models         models/animatediff_models         models/tensorrt/rife         input output temp custom_nodes user/default &&     mv ../ComfyUI-Manager custom_nodes/ &&     if [ -d /custom_nodes_staged ] && [ "$(ls -A /custom_nodes_staged 2>/dev/null)" ]; then         cp -r /custom_nodes_staged/* custom_nodes/;     fi &&     chmod -R 755 /default-comfyui-bundle/ComfyUI
+#7 CACHED
+
+#8 [stage-0  7/18] COPY extra_packages.txt /tmp/extra_packages.txt
+#8 CACHED
+
+#9 [stage-0  4/18] COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
+#9 CACHED
+
+#10 [stage-0  9/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation     git+https://github.com/NVlabs/nvdiffrast.git
+#10 CACHED
+
+#11 [stage-0  6/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -s /tmp/special_logic_requirements.txt ]; then         grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' | grep -v 'flash-attn' > /tmp/special_clean.txt &&         /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/special_clean.txt;     fi &&     if [ -f /tmp/prebuilt/flash_attn.tar.gz ] && [ -s /tmp/prebuilt/flash_attn.tar.gz ]; then         echo "=== Using prebuilt flash_attn ===" &&         tar xzf /tmp/prebuilt/flash_attn.tar.gz -C /;     else         /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt ||         echo "? flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt;     fi
+#11 CACHED
+
+#12 [stage-0 10/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     git clone https://github.com/IDEA-Research/GroundingDINO.git /tmp/GroundingDINO &&     sed -i 's/AT_DISPATCH_FLOATING_TYPES(value\.type()/AT_DISPATCH_FLOATING_TYPES(value.scalar_type()/g'         /tmp/GroundingDINO/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.cu &&     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation /tmp/GroundingDINO &&     rm -rf /tmp/GroundingDINO
+#12 CACHED
+
+#13 [stage-0  3/18] RUN git clone https://github.com/comfyanonymous/ComfyUI.git &&     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+#13 CACHED
+
+#14 [stage-0 12/18] WORKDIR /default-comfyui-bundle/ComfyUI
+#14 CACHED
+
+#15 [stage-0  8/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --cache-dir=/pip-cache setuptools Cython &&     cat ComfyUI/requirements.txt > /tmp/all_requirements.txt &&     if [ -f ComfyUI-Manager/requirements.txt ]; then         cat ComfyUI-Manager/requirements.txt >> /tmp/all_requirements.txt;     fi &&     if [ -s /tmp/extra_packages.txt ]; then         grep -v '^#' /tmp/extra_packages.txt | grep -v '^$' >> /tmp/all_requirements.txt;     fi &&     grep -v -E 'nvdiffrast|tensorrt|oidn-python' /tmp/all_requirements.txt > /tmp/requirements_no_nvdiff.txt &&     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
+#15 CACHED
+
+#16 [stage-0  2/18] WORKDIR /default-comfyui-bundle
+#16 CACHED
+
+#17 [stage-0 13/18] RUN --mount=type=cache,target=/pip-cache,id=pip-external     /venv/bin/pip install --no-deps pilmoji==2.0.4 &&     /venv/bin/pip install --no-deps dghs-imgutils &&     /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 &&     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools &&     /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true &&     /venv/bin/pip install --no-deps onnxruntime-gpu &&     /venv/bin/pip install --cache-dir=/pip-cache comfyui-manager &&     python3 - << 'EOF'
+#17 CACHED
+
+#18 [stage-0 14/18] RUN python3 - << 'EOF'
+#18 0.206 WARNING: Comfyui_OIDN_Denoiser patch pattern not found
+#18 DONE 0.2s
+
+#19 [stage-0 15/18] RUN mkdir -p     /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts/depth-anything/Depth-Anything-V2-Large     /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints     /default-comfyui-bundle/ComfyUI/models/animatediff_models
+#19 DONE 0.2s
+
+#20 [stage-0 16/18] RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 180; kill $! 2>/dev/null || true
+#20 6.272 [START] Security scan
+#20 6.272 [DONE] Security scan
+#20 6.272 ## ComfyUI-Manager: installing dependencies done.
+#20 6.272 ** ComfyUI startup time: 2026-03-29 02:05:41.382
+#20 6.272 ** Platform: Linux
+#20 6.273 ** Python version: 3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]
+#20 6.273 ** Python executable: /venv/bin/python3
+#20 6.273 ** ComfyUI Path: /default-comfyui-bundle/ComfyUI
+#20 6.273 ** ComfyUI Base Folder Path: /default-comfyui-bundle/ComfyUI
+#20 6.273 ** User directory: /default-comfyui-bundle/ComfyUI/user
+#20 6.273 ** ComfyUI-Manager config path: /default-comfyui-bundle/ComfyUI/user/__manager/config.ini
+#20 6.273 ** Log path: /default-comfyui-bundle/ComfyUI/user/comfyui.log
+#20 8.168 
+#20 8.168 Prestartup times for custom nodes:
+#20 8.169    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/rgthree-comfy
+#20 8.169    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3
+#20 8.169    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use
+#20 8.169    6.6 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager
+#20 8.169 
+#20 8.677 /venv/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+#20 8.677   import pynvml  # type: ignore[import]
+#20 12.41 WARNING: You need pytorch with cu130 or higher to use optimized CUDA operations.
+#20 12.41 Found comfy_kitchen backend eager: {'available': True, 'disabled': False, 'unavailable_reason': None, 'capabilities': ['apply_rope', 'apply_rope1', 'dequantize_nvfp4', 'dequantize_per_tensor_fp8', 'quantize_nvfp4', 'quantize_per_tensor_fp8', 'scaled_mm_nvfp4']}
+#20 12.41 Found comfy_kitchen backend cuda: {'available': False, 'disabled': True, 'unavailable_reason': 'CUDA not available on this system', 'capabilities': []}
+#20 12.41 Found comfy_kitchen backend triton: {'available': False, 'disabled': True, 'unavailable_reason': 'Neither CUDA nor XPU available on this system', 'capabilities': []}
+#20 12.43 Checkpoint files will always be loaded safely.
+#20 12.49 Total VRAM 63827 MB, total RAM 63827 MB
+#20 12.49 pytorch version: 2.6.0+cu126
+#20 12.49 Forcing FP32, if this improves things please report it.
+#20 12.49 Set vram state to: DISABLED
+#20 12.49 Device: cpu
+#20 12.75 Using sub quadratic optimization for attention, if you have memory or speed issues try using: --use-split-cross-attention
+#20 16.48 Python version: 3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]
+#20 16.48 ComfyUI version: 0.18.1
+#20 16.48 comfy-aimdo version: 0.2.12
+#20 16.48 comfy-kitchen version: 0.2.8
+#20 16.48 ComfyUI frontend version: 1.42.8
+#20 16.49 [Prompt Server] web root: /venv/lib/python3.12/site-packages/comfyui_frontend_package/static
+#20 16.49 Asset seeder disabled
+#20 18.86 ### Loading: ComfyUI-Manager (V3.39.2)
+#20 18.86 [ComfyUI-Manager] network_mode: public
+#20 18.86 [ComfyUI-Manager] ComfyUI per-queue preview override detected (PR #11261). Manager's preview method feature is disabled. Use ComfyUI's --preview-method CLI option or 'Settings > Execution > Live preview method'.
+#20 18.90 ### ComfyUI Version: v0.18.1-31-gfc1fdf33 | Released on '2026-03-28'
+#20 19.11 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/alter-list.json
+#20 19.13 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/model-list.json
+#20 19.25 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/github-stats.json
+#20 19.31 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json
+#20 19.52 [ComfyUI-Manager] default cache updated: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/extension-node-map.json
+#20 20.01 NumExpr defaulting to 12 threads.
+#20 21.98 [34m[ComfyUI-Easy-Use] server: [0mv1.3.7 [92mLoaded[0m
+#20 21.98 [34m[ComfyUI-Easy-Use] web root: [0m/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use/web_version/v2 [92mLoaded[0m
+#20 22.02 
+#20 22.02 [92m[rgthree-comfy] Loaded 48 epic nodes. 🎉[0m
+#20 22.02 
+#20 22.02 [33m[rgthree-comfy] ComfyUI's new Node 2.0 rendering may be incompatible with some rgthree-comfy nodes and features, breaking some rendering as well as losing the ability to access a node's properties (a vital part of many nodes). It also appears to run MUCH more slowly spiking CPU usage and causing jankiness and unresponsiveness, especially with large workflows. Personally I am not planning to use the new Nodes 2.0 and, unfortunately, am not able to invest the time to investigate and overhaul rgthree-comfy where needed. If you have issues when Nodes 2.0 is enabled, I'd urge you to switch it off as well and join me in hoping ComfyUI is not planning to deprecate the existing, stable canvas rendering all together.
+#20 22.02 [0m
+#20 22.03 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using ckpts path: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux/ckpts[0m
+#20 22.03 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using symlinks: False[0m
+#20 22.03 [36;20m[/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux] | INFO -> Using ort providers: ['CUDAExecutionProvider', 'DirectMLExecutionProvider', 'OpenVINOExecutionProvider', 'ROCMExecutionProvider', 'CPUExecutionProvider', 'CoreMLExecutionProvider'][0m
+#20 22.50 generated new fontManager
+#20 22.89 FETCH ComfyRegistry Data: 5/135
+#20 23.08 DWPose: Onnxruntime with acceleration providers detected
+#20 23.33 [AnimateDiffEvo] - [0;31mERROR[0m - No motion models found. Please download one and place in: ['/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved/models', '/default-comfyui-bundle/ComfyUI/models/animatediff_models']
+#20 26.95 FETCH ComfyRegistry Data: 10/135
+#20 27.10 [Crystools [0;32mINFO[0m] Crystools version: 1.27.4
+#20 27.15 [Crystools [0;32mINFO[0m] Platform release: 5.14.0-611.27.1.el9_7.x86_64
+#20 27.15 [Crystools [0;32mINFO[0m] JETSON: Not detected.
+#20 27.15 [Crystools [0;32mINFO[0m] CPU: Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz - Arch: x86_64 - OS: Linux 5.14.0-611.27.1.el9_7.x86_64
+#20 27.16 [Crystools [0;31mERROR[0m] Could not init pynvml (NVIDIA). NVML Shared Library Not Found
+#20 27.16 [Crystools [0;33mWARNING[0m] No GPU monitoring libraries available.
+#20 27.28 ComfyUI-GGUF: Partial torch compile only, consider updating pytorch
+#20 27.82 No CUDA runtime is found, using CUDA_HOME='/usr/local/cuda'
+#20 27.86 ### Loading: ComfyUI-Impact-Pack (V8.28.2)
+#20 28.30 [Impact Pack] Wildcard total size (0.00 MB) is within cache limit (50.00 MB). Using full cache mode.
+#20 28.30 [Impact Pack] Wildcards loading done.
+#20 28.30 ### Loading: ComfyUI-Impact-Subpack (V1.3.5)
+#20 28.31 [Impact Pack/Subpack] Using folder_paths to determine whitelist path: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt
+#20 28.31 [Impact Pack/Subpack] Ensured whitelist directory exists: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack
+#20 28.31 [Impact Pack/Subpack] Model whitelist file not found at: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt. 
+#20 28.31  >> An empty whitelist file will be created.
+#20 28.31  >> To allow unsafe loading for specific trusted legacy models (e.g., older .pt),
+#20 28.31  >> add their base filenames (one per line) to this file.
+#20 28.31 [Impact Pack/Subpack] Created empty whitelist file: /default-comfyui-bundle/ComfyUI/user/default/ComfyUI-Impact-Subpack/model-whitelist.txt
+#20 28.38 Creating new Ultralytics Settings v0.0.6 file ✅ 
+#20 28.38 View Ultralytics Settings with 'yolo settings' or at '/root/.config/Ultralytics/settings.json'
+#20 28.38 Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+#20 28.63 [Impact Subpack] ultralytics_bbox: /default-comfyui-bundle/ComfyUI/models/ultralytics/bbox
+#20 28.63 [Impact Subpack] ultralytics_segm: /default-comfyui-bundle/ComfyUI/models/ultralytics/segm
+#20 28.64 ### Loading: ComfyUI-Inspire-Pack (V1.23)
+#20 28.99 [94mtheUpsiders Logic Nodes: [92mLoaded[0m
+#20 29.44 Error loading module AILab_QwenVL_GGUF_PromptEnhancer: Failed to load 'ggml' from [PosixPath('/venv/lib/python3.12/site-packages/llama_cpp/lib'), PosixPath('/venv/lib/python3.12/site-packages/llama_cpp/bin'), '/usr/local/lib', '/usr/lib', '/usr/lib64']
+#20 29.44 libggml.so.0: libcuda.so.1: cannot open shared object file: No such file or directory
+#20 29.44 /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml.so: libcuda.so.1: cannot open shared object file: No such file or directory
+#20 30.60 /venv/lib/python3.12/site-packages/torch/amp/autocast_mode.py:266: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
+#20 30.60   warnings.warn(
+#20 30.69 [34m[ComfyUI-RMBG][0m v[93m3.0.0[0m | [93m43 nodes[0m [92mLoaded[0m
+#20 31.01 FETCH ComfyRegistry Data: 15/135
+#20 31.71 
+#20 31.71 [0;33m[ReActor][0m - [38;5;173mSTATUS[0m - [0;32mRunning v0.6.2-b1 in ComfyUI[0m
+#20 31.87 Torch version: 2.6.0+cu126
+#20 32.04 [ReservedVRAM]警告：pynvml可导入但NVML初始化失败，auto选项将不可用。
+#20 32.04 [ReservedVRAM]NVML初始化失败: NVML Shared Library Not Found
+#20 34.23 ⚡ SeedVR2 optimizations check: SageAttention ✅ | Flash Attention ❌ | Triton ✅
+#20 34.23 💡 Optional: pip install flash-attn
+#20 34.25 ⚠️ Memory check failed: No GPU backend available (CUDA/MPS) - No available backend!
+#20 34.27 /venv/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+#20 34.27   import pynvml  # type: ignore[import]
+#20 34.42 Error while calling comfy_entrypoint in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler: list index out of range
+#20 34.73 FETCH ComfyRegistry Data: 20/135
+#20 35.74 ------------------------------------------
+#20 35.74 [34mComfyroll Studio v1.76 : [92m 175 Nodes Loaded[0m
+#20 35.74 ------------------------------------------
+#20 35.74 ** For changes, please see patch notes at https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes/blob/main/Patch_Notes.md
+#20 35.74 ** For help, please see the wiki at https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes/wiki
+#20 35.74 ------------------------------------------
+#20 35.81 [34mFearnworks Custom Nodes: [92mLoading...[0m
+#20 35.81 [34m FEARNWORKS CUSTOM NODES: [92mAll nodes loaded successfully[0m
+#20 35.81 Making the "web\extensions\FizzleDorf" folder
+#20 35.81 Update to javascripts files detected
+#20 35.81 Copying Folder here to satisfy init, eventually I'll have stuff in here..txt to extensions folder
+#20 35.83 [34mFizzleDorf Custom Nodes: [92mLoaded[0m
+#20 36.57 [[94mComfyUI-Rife-Tensorrt[0m|[92mINFO[0m] - [92mSuccessfully loaded configuration from load_rife_config.json[0m
+#20 36.62 Original USDU script not found, downloading it from https://github.com/Coyote-A/ultimate-upscale-for-automatic1111
+#20 37.34 Original USDU script downloaded successfully
+#20 37.38 USDU batch patches applied successfully.
+#20 37.38 USDU batch patches applied successfully.
+#20 37.42 Base directory: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip
+#20 37.42 Checkpoints path: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#20 37.42 Model path: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints/wav2lip_gan.pth
+#20 37.42 Traceback (most recent call last):
+#20 37.42   File "/default-comfyui-bundle/ComfyUI/nodes.py", line 2227, in load_custom_node
+#20 37.42     module_spec.loader.exec_module(module)
+#20 37.42   File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+#20 37.42   File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+#20 37.42   File "/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/__init__.py", line 1, in <module>
+#20 37.42     from .wav2lip import Wav2Lip, LoadAudio
+#20 37.42   File "/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/wav2lip.py", line 36, in <module>
+#20 37.42     assert model_exists, f"Model {wav2lip_model_file} not found in {checkpoints_path}"
+#20 37.42            ^^^^^^^^^^^^
+#20 37.42 AssertionError: Model wav2lip_gan.pth not found in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#20 37.42 
+#20 37.42 Cannot import /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip module for custom nodes: Model wav2lip_gan.pth not found in /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints
+#20 37.69 Config file created.
+#20 38.02 Using sub quadratic optimization for attention, if you have memory or speed issues try using: --use-split-cross-attention
+#20 38.11 (RES4LYF) Init
+#20 38.11 (RES4LYF) Importing beta samplers.
+#20 38.23 (RES4LYF) Importing legacy samplers.
+#20 38.39 @@device:cpu
+#20 38.40 @@device:cpu
+#20 38.44 [0;33m[ReActor][0m - [38;5;173mSTATUS[0m - [0;32mRunning v0.6.2-b1 in ComfyUI[0m
+#20 38.61 Torch version: 2.6.0+cu126
+#20 38.80 FETCH ComfyRegistry Data: 25/135
+#20 42.52 FETCH ComfyRegistry Data: 30/135
+#20 45.60 libportaudio2 is already installed.
+#20 46.64 FETCH ComfyRegistry Data: 35/135
+#20 46.79 The installation of llama-cpp-python was skipped
+#20 46.79 如果你想要安装llama-cpp-python，请在/default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_LLM_party/config.ini中的[API_KEYS]添加或者修改fast_installed= False,然后然后重新运行程序。
+#20 46.79 If you want to install llama-cpp-python, please add or modify fast_installed= False in /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_LLM_party/config.ini in [API_KEYS] and then run the program again.
+#20 47.65 Successfully uninstalled discord.py
+#20 50.23 FETCH ComfyRegistry Data: 40/135
+#20 52.20 Successfully installed py-cord[voice]
+#20 52.23 [K✨ [config.json] 文件不存在，创建默认配置...
+#20 52.23 [K✨ [system_prompts.json] 文件不存在，创建默认配置...
+#20 52.24 [K✨ [active_prompts.json] 文件不存在，创建默认配置...
+#20 52.24 [K✨ [tags_user.json] 文件不存在，创建默认配置...
+#20 52.24 [K✨ [kontext_presets.json] 文件不存在，创建默认配置...
+#20 52.24 [K✨ ✨ 检测到全新环境，已基于模板创建初始标签文件: 默认标签.csv
+#20 52.24 [K✨ [用户标签.csv] 数据迁移完成
+#20 52.27 ✨提示词小助手 V2.0.4 已启动
+#20 53.09 [34mWAS Node Suite: [0mCreated default conf file at `/default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json`.[0m
+#20 54.00 [34mWAS Node Suite: [0mOpenCV Python FFMPEG support is enabled[0m
+#20 54.00 [34mWAS Node Suite [93mWarning: [0m`ffmpeg_bin_path` is not set in `/default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui/was_suite_config.json` config file. Will attempt to use system ffmpeg binaries if available.[0m
+#20 54.13 FETCH ComfyRegistry Data: 45/135
+#20 54.79 [34mWAS Node Suite: [0mFinished.[0m [32mLoaded[0m [0m220[0m [32mnodes successfully.[0m
+#20 54.79 
+#20 54.79 	[3m[93m"Art is the freedom to create, explore, and inspire."[0m[3m - Unknown[0m
+#20 54.79 
+#20 54.79 
+#20 54.79 Import times for custom nodes:
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/websocket_image_save.py
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-int-and-float
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_OIDN_Denoiser
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LatentClamp
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI--Wan22FirstLastFrameToVideoLatent
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUi-Scale-Image-to-Total-Pixels-Advanced
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Unload-Model
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/sdxl_prompt_styler
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Simple-VFI
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfy-image-saver
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-ReservedVRAM
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Logic
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-use-everywhere
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/sd-dynamic-thresholding
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_FearnworksNodes
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-image-picker
+#20 54.79    0.0 seconds (IMPORT FAILED): /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-InpaintEasy
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Unload-Models
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-UltimateSDUpscale-GGUF
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/cg-image-filter
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Latent-Modifiers
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-MelBandRoFormer
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_RIFE_TensorRT_Auto
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_TTP_Toolset
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-VFI
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-instantId-faceswap
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Advanced-Latent-Control
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Derfuu_ComfyUI_ModdedNodes
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Custom-Scripts
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-OIDN
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyMath
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dream-video-batches
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_FizzNodes
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-YarvixPA
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-IPAdapter-Flux
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_IPAdapter_plus
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Frame-Interpolation
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dream-project
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_essentials
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/rgthree-comfy
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-dynamicprompts
+#20 54.79    0.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_Simple_Qwen3-VL-gguf
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-WanVideoStartEndFrames
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_segment_anything
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_QwenVL
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-liveportrait
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/OneButtonPrompt
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_ExtraModels
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Advanced-ControlNet
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_prompt_assistant
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-GGUF
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/facerestore_cf
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Inspire-Pack
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LTXVideo
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-VideoHelperSuite
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-QwenVL
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Manager
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_Comfyroll_CustomNodes
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-AnimateDiff-Evolved
+#20 54.79    0.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-KJNodes
+#20 54.79    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_face_restorer
+#20 54.79    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui-reactor-node
+#20 54.79    0.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_LayerStyle
+#20 54.79    0.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-LogicUtils
+#20 54.79    0.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Impact-Subpack
+#20 54.79    0.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_InstantID
+#20 54.79    0.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Impact-Pack
+#20 54.79    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Rife-Tensorrt
+#20 54.79    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-GPENO
+#20 54.79    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Crystools
+#20 54.79    0.5 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/RES4LYF
+#20 54.79    0.8 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_UltimateSDUpscale
+#20 54.79    1.0 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-WanVideoWrapper
+#20 54.79    1.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_controlnet_aux
+#20 54.79    1.2 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-RMBG
+#20 54.79    1.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-ReActor
+#20 54.79    1.9 seconds (IMPORT FAILED): /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SeedVR2_VideoUpscaler
+#20 54.79    2.4 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/was-node-suite-comfyui
+#20 54.79    3.1 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Easy-Use
+#20 54.79    3.3 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-Copilot
+#20 54.79   13.6 seconds: /default-comfyui-bundle/ComfyUI/custom_nodes/comfyui_LLM_party
+#20 54.79 
+#20 54.80 Context impl SQLiteImpl.
+#20 54.80 Will assume non-transactional DDL.
+#20 54.80 Context impl SQLiteImpl.
+#20 54.80 Will assume non-transactional DDL.
+#20 54.81 Running upgrade  -> 0001_assets, Initial assets schema
+#20 54.81 Revision ID: 0001_assets
+#20 54.81 Revises: None
+#20 54.81 Create Date: 2025-12-10 00:00:00
+#20 54.95 Running upgrade 0001_assets -> 0002_merge_to_asset_references, Merge AssetInfo and AssetCacheState into unified asset_references table.
+#20 55.07 Running upgrade 0002_merge_to_asset_references -> 0003_add_metadata_job_id, Add system_metadata and job_id columns to asset_references.
+#20 55.07 Change preview_id FK from assets.id to asset_references.id.
+#20 55.12 Database upgraded from None to 0003_add_metadata_job_id
+#20 55.19 Starting server
+#20 55.19 
+#20 55.19 To see the GUI go to: http://0.0.0.0:8188
+#20 55.19 To see the GUI go to: http://[::]:8188
+#20 57.94 FETCH ComfyRegistry Data: 50/135
+#20 61.53 FETCH ComfyRegistry Data: 55/135
+#20 65.14 FETCH ComfyRegistry Data: 60/135
+#20 68.71 FETCH ComfyRegistry Data: 65/135
+#20 72.59 FETCH ComfyRegistry Data: 70/135
+#20 76.61 FETCH ComfyRegistry Data: 75/135
+#20 80.48 FETCH ComfyRegistry Data: 80/135
+#20 84.60 FETCH ComfyRegistry Data: 85/135
+#20 88.23 FETCH ComfyRegistry Data: 90/135
+#20 92.28 FETCH ComfyRegistry Data: 95/135
+#20 96.41 FETCH ComfyRegistry Data: 100/135
+#20 100.0 FETCH ComfyRegistry Data: 105/135
+#20 104.4 FETCH ComfyRegistry Data: 110/135
+#20 110.6 FETCH ComfyRegistry Data: 115/135
+#20 114.2 FETCH ComfyRegistry Data: 120/135
+#20 118.1 FETCH ComfyRegistry Data: 125/135
+#20 122.2 FETCH ComfyRegistry Data: 130/135
+#20 126.0 FETCH ComfyRegistry Data: 135/135
+#20 126.5 FETCH ComfyRegistry Data [DONE]
+#20 126.7 [ComfyUI-Manager] default cache updated: https://api.comfy.org/nodes
+#20 126.7 FETCH DATA from: https://raw.githubusercontent.com/ltdrdata/ComfyUI-Manager/main/custom-node-list.json [DONE]
+#20 127.0 [ComfyUI-Manager] All startup tasks have been completed.
+#20 DONE 180.3s
+
+#21 [stage-0 17/18] RUN cat > /tmp/update_config.py << 'EOF'
+#21 DONE 0.2s
+
+#22 [stage-0 18/18] RUN python3 /tmp/update_config.py && rm /tmp/update_config.py
+#22 0.275 Config updated: custom node installation enabled
+#22 0.275 {
+#22 0.275   "Comfy.NodeLibrary.Bookmarks.V2": [],
+#22 0.275   "Comfy.UseNewMenu": "Top",
+#22 0.275   "Comfy.NodeLibrary.EnableInstall": true
+#22 0.275 }
+#22 DONE 0.3s
+
+#23 exporting to image
+#23 exporting layers
+#23 exporting layers 1.7s done
+#23 writing image sha256:e08f65e1c85ca6a4c0796d959df0b79edf81fabfa36a1f0bb1fa60aef9b9f2f1 done
+#23 naming to docker.io/library/sd-worker:staging done
+#23 DONE 1.8s

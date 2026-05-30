@@ -5,6 +5,7 @@ ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
 ENV PYOPENGL_PLATFORM=osmesa
+ENV UV_LINK_MODE=copy
 WORKDIR /default-comfyui-bundle
 
 # Layer 1: Clone ComfyUI + Manager
@@ -16,8 +17,9 @@ COPY special_logic_requirements.txt /tmp/special_logic_requirements.txt
 COPY prebuilt/ /tmp/prebuilt/
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     if [ -s /tmp/special_logic_requirements.txt ]; then \
-        grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' | grep -v 'flash-attn' > /tmp/special_clean.txt && \
-        /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/special_clean.txt; \
+        grep -v '^#' /tmp/special_logic_requirements.txt | grep -v '^$' | grep -v 'flash-attn' | grep -v 'tensorrt' > /tmp/special_clean.txt && \
+        /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/special_clean.txt && \
+        /venv/bin/pip install --cache-dir=/pip-cache --extra-index-url https://pypi.nvidia.com tensorrt-cu13>=10.0.0; \
     fi && \
     if [ -f /tmp/prebuilt/flash_attn.tar.gz ] && [ -s /tmp/prebuilt/flash_attn.tar.gz ]; then \
         echo "=== Using prebuilt flash_attn ===" && \
@@ -85,22 +87,28 @@ if p.exists():
 EOF
 
 # Patch OIDN nodes: fix shape and contiguity issues
-RUN python3 - << 'EOF'
-import pathlib
+RUN python3 - << 'PYEOF'
+import pathlib, re
 
 p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/Comfyui_OIDN_Denoiser/oidn_denoiser.py")
 if p.exists():
     txt = p.read_text()
-    old = '    def denoise(self, img_np):\n        h, w, c = img_np.shape\n\n        # Normalize if necessary\n        if img_np.max() > 1.0:\n            img_np = img_np / 255.0\n\n        input_buf = img_np.astype(np.float32)\n        output_buf = np.empty_like(input_buf)\n\n        input_buf = input_buf.squeeze(0) if input_buf.ndim == 4 else input_buf\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf, oidn.FORMAT_FLOAT3, w, h)\n        oidn.SetSharedFilterImage(self.filter, "output", output_buf, oidn.FORMAT_FLOAT3, w, h)'
-    new = '    def denoise(self, img_np):\n        if img_np.ndim == 4:\n            img_np = img_np.squeeze(0)\n        h, w, c = img_np.shape\n        if img_np.max() > 1.0:\n            img_np = img_np / 255.0\n        input_buf = np.ascontiguousarray(img_np.astype(np.float32))\n        output_buf = np.ascontiguousarray(np.empty_like(input_buf))\n        oidn.SetSharedFilterImage(self.filter, "color", input_buf, oidn.FORMAT_FLOAT3, w, h)\n        oidn.SetSharedFilterImage(self.filter, "output", output_buf, oidn.FORMAT_FLOAT3, w, h)'
-    if old in txt:
-        p.write_text(txt.replace(old, new))
-        print("Patched Comfyui_OIDN_Denoiser")
-    else:
-        print("WARNING: Comfyui_OIDN_Denoiser patch pattern not found")
+    new_method = '''    def denoise(self, img_np):
+        if img_np.ndim == 4:
+            img_np = img_np.squeeze(0)
+        h, w, c = img_np.shape
+        if img_np.max() > 1.0:
+            img_np = img_np / 255.0
+        input_buf = np.ascontiguousarray(img_np.astype(np.float32))
+        output_buf = np.ascontiguousarray(np.empty_like(input_buf))
+        oidn.SetSharedFilterImage(self.filter, "color", input_buf, oidn.FORMAT_FLOAT3, w, h)
+        oidn.SetSharedFilterImage(self.filter, "output", output_buf, oidn.FORMAT_FLOAT3, w, h)'''
+    txt = re.sub(r'    def denoise\(self, img_np\):.*?oidn\.SetSharedFilterImage\(self\.filter, "output", output_buf[^\n]*', new_method, txt, flags=re.DOTALL)
+    p.write_text(txt)
+    print("Patched Comfyui_OIDN_Denoiser")
 else:
-    print("Comfyui_OIDN_Denoiser not found, skipping")
-EOF
+    print("Not found, skipping")
+PYEOF
 
 # Layer 4: Ensure mount point directories exist
 RUN mkdir -p \

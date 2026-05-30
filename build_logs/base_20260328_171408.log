@@ -1,0 +1,136 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.base
+#1 transferring dockerfile: 5.62kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+#2 DONE 0.7s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [stage-0  1/10] FROM docker.io/nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04@sha256:50efab398f76258daa91ceebb33b6467e40217c67ea44fb5a2cebc6be7d9cce3
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 301B done
+#5 DONE 0.0s
+
+#6 [stage-0  2/10] RUN apt-get update && apt-get install -y --no-install-recommends     python3.12 python3.12-dev python3.12-venv python3-pip     git cmake build-essential     portaudio19-dev libportaudio2     ffmpeg libsm6 libxext6     libtbb12     libegl-mesa0 libgl1-mesa-dri     libegl1 libosmesa6 libopengl0 &&     ln -sf /usr/lib/x86_64-linux-gnu/libEGL.so.1 /usr/lib/x86_64-linux-gnu/libEGL.so.0 &&     ldconfig &&     rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [stage-0  3/10] RUN --mount=type=cache,target=/pip-cache,id=pip-external     python3.12 -m venv /venv &&     /venv/bin/pip install --cache-dir=/pip-cache uv &&     /venv/bin/pip install --cache-dir=/pip-cache       torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0       --index-url https://download.pytorch.org/whl/cu126 --no-deps
+#7 CACHED
+
+#8 [stage-0  4/10] COPY prebuilt/ /tmp/prebuilt/
+#8 CACHED
+
+#9 [stage-0  5/10] RUN --mount=type=cache,target=/pip-cache,id=pip-external     if [ -f /tmp/prebuilt/llama_cpp.tar.gz ] && [ -s /tmp/prebuilt/llama_cpp.tar.gz ]; then         echo "=== Using prebuilt llama_cpp ===" &&         tar xzf /tmp/prebuilt/llama_cpp.tar.gz -C /;     else         echo "=== Building llama-cpp-python from source ===" &&         export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" &&         ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 &&         export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:/usr/lib:/usr/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" &&         /venv/bin/pip install --cache-dir=/pip-cache scikit-build-core setuptools &&         git clone https://github.com/JamePeng/llama-cpp-python /tmp/llama-cpp-python &&         cd /tmp/llama-cpp-python &&         git submodule update --init --recursive &&         sed -i '27s/"native"/"50"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt &&         CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/cuda/lib64/stubs"         /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall .;     fi
+#9 CACHED
+
+#10 [stage-0  6/10] RUN if [ -f /tmp/prebuilt/llama_cpp.tar.gz ] && [ -s /tmp/prebuilt/llama_cpp.tar.gz ]; then         echo "=== Skipping conversion requirements (prebuilt) ===";     else         git clone https://github.com/ggerganov/llama.cpp /tmp/llama.cpp-main &&         /venv/bin/pip install -r /tmp/llama.cpp-main/requirements/requirements-convert_hf_to_gguf.txt &&         rm -rf /tmp/llama.cpp-main &&         cd /tmp/llama-cpp-python/vendor/llama.cpp &&         find requirements -name "*.txt" -exec /venv/bin/pip install -r {} ; 2>/dev/null || true;     fi
+#10 0.152 === Skipping conversion requirements (prebuilt) ===
+#10 DONE 0.2s
+
+#11 [stage-0  7/10] RUN if [ -f /tmp/prebuilt/llama_cpp.tar.gz ] && [ -s /tmp/prebuilt/llama_cpp.tar.gz ]; then         echo "=== Skipping llama-quantize build (prebuilt) ===";     else         cd /tmp/llama-cpp-python/vendor/llama.cpp &&         export CUDA_STUBS_DIR="/usr/local/cuda/lib64/stubs" &&         export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:/usr/lib:/usr/lib64:/usr/local/cuda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64" &&         cmake -B build           -DGGML_CUDA=ON           -DCMAKE_CUDA_ARCHITECTURES=50           -DGGML_NATIVE=OFF           -DLLAMA_CURL=OFF           -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/cuda/lib64/stubs" &&         cmake --build build --config Release --target llama-quantize -j$(nproc) &&         mkdir -p bin && cp build/bin/llama-quantize bin/ &&         mv /tmp/llama-cpp-python/vendor/llama.cpp /opt/llama.cpp &&         cd / && rm -rf /tmp/llama-cpp-python;     fi
+#11 0.195 === Skipping llama-quantize build (prebuilt) ===
+#11 DONE 0.2s
+
+#12 [stage-0  8/10] RUN echo "=== Checking installed files ===" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/ &&     echo "" &&     echo "=== Checking CUDA libraries ===" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/lib/ &&     echo "" &&     echo "=== Verifying CUDA linkage for libggml-cuda.so ===" &&     ldd /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml-cuda.so | grep -E "cuda|not found" &&     echo "" &&     echo "=== Checking llama-cpp-python version ===" &&     /venv/bin/pip show llama-cpp-python &&     echo "" &&     echo "=== Build artifacts verified ===" ||     (echo "!!! VERIFICATION FAILED - See output above !!!" && exit 1)
+#12 0.179 === Checking installed files ===
+#12 0.180 total 832K
+#12 0.180 drwxr-xr-x. 7 root root 4.0K Mar 28 15:08 .
+#12 0.180 drwxr-xr-x. 1 root root   23 Mar 28 23:59 ..
+#12 0.180 -rw-r--r--. 1 root root   70 Mar 28 15:08 __init__.py
+#12 0.180 drwxr-xr-x. 2 root root 4.0K Mar 28 15:08 __pycache__
+#12 0.180 -rw-r--r--. 1 root root 5.1K Mar 28 15:08 _ctypes_extensions.py
+#12 0.180 -rw-r--r--. 1 root root  27K Mar 28 15:08 _ggml.py
+#12 0.180 -rw-r--r--. 1 root root  72K Mar 28 15:08 _internals.py
+#12 0.180 -rw-r--r--. 1 root root 1.3K Mar 28 15:08 _logger.py
+#12 0.180 -rw-r--r--. 1 root root 2.3K Mar 28 15:08 _utils.py
+#12 0.180 drwxr-xr-x. 3 root root   54 Mar 28 15:08 bin
+#12 0.180 drwxr-xr-x. 2 root root 4.0K Mar 28 15:08 include
+#12 0.180 drwxr-xr-x. 4 root root 4.0K Mar 28 15:08 lib
+#12 0.180 -rw-r--r--. 1 root root 146K Mar 28 15:08 llama.py
+#12 0.180 -rw-r--r--. 1 root root  21K Mar 28 15:08 llama_cache.py
+#12 0.180 -rw-r--r--. 1 root root 234K Mar 28 15:08 llama_chat_format.py
+#12 0.180 -rw-r--r--. 1 root root 174K Mar 28 15:08 llama_cpp.py
+#12 0.180 -rw-r--r--. 1 root root  18K Mar 28 15:08 llama_embedding.py
+#12 0.180 -rw-r--r--. 1 root root  40K Mar 28 15:08 llama_grammar.py
+#12 0.180 -rw-r--r--. 1 root root 2.1K Mar 28 15:08 llama_speculative.py
+#12 0.180 -rw-r--r--. 1 root root 3.8K Mar 28 15:08 llama_tokenizer.py
+#12 0.180 -rw-r--r--. 1 root root 8.5K Mar 28 15:08 llama_types.py
+#12 0.180 -rw-r--r--. 1 root root  30K Mar 28 15:08 mtmd_cpp.py
+#12 0.180 -rw-r--r--. 1 root root    0 Mar 28 15:08 py.typed
+#12 0.180 drwxr-xr-x. 3 root root  159 Mar 28 15:08 server
+#12 0.181 
+#12 0.181 === Checking CUDA libraries ===
+#12 0.182 total 312M
+#12 0.182 drwxr-xr-x. 4 root root  4.0K Mar 28 15:08 .
+#12 0.182 drwxr-xr-x. 7 root root  4.0K Mar 28 15:08 ..
+#12 0.182 drwxr-xr-x. 4 root root    31 Mar 28 15:08 cmake
+#12 0.182 -rw-r--r--. 1 root root  683K Mar 28 15:08 libggml-base.so
+#12 0.182 -rw-r--r--. 1 root root  683K Mar 28 15:08 libggml-base.so.0
+#12 0.182 -rw-r--r--. 1 root root  683K Mar 28 15:08 libggml-base.so.0.9.8
+#12 0.182 -rw-r--r--. 1 root root 1022K Mar 28 15:08 libggml-cpu.so
+#12 0.182 -rw-r--r--. 1 root root 1022K Mar 28 15:08 libggml-cpu.so.0
+#12 0.182 -rw-r--r--. 1 root root 1022K Mar 28 15:08 libggml-cpu.so.0.9.8
+#12 0.182 -rw-r--r--. 1 root root   99M Mar 28 15:08 libggml-cuda.so
+#12 0.182 -rw-r--r--. 1 root root   99M Mar 28 15:08 libggml-cuda.so.0
+#12 0.182 -rw-r--r--. 1 root root   99M Mar 28 15:08 libggml-cuda.so.0.9.8
+#12 0.182 -rw-r--r--. 1 root root   47K Mar 28 15:08 libggml.so
+#12 0.182 -rw-r--r--. 1 root root   47K Mar 28 15:08 libggml.so.0
+#12 0.182 -rw-r--r--. 1 root root   47K Mar 28 15:08 libggml.so.0.9.8
+#12 0.182 -rw-r--r--. 1 root root  3.1M Mar 28 15:08 libllama.so
+#12 0.182 -rw-r--r--. 1 root root  3.1M Mar 28 15:08 libllama.so.0
+#12 0.182 -rw-r--r--. 1 root root  3.1M Mar 28 15:08 libllama.so.0.0.8559
+#12 0.182 -rw-r--r--. 1 root root  939K Mar 28 15:08 libmtmd.so
+#12 0.182 -rw-r--r--. 1 root root  939K Mar 28 15:08 libmtmd.so.0
+#12 0.182 -rw-r--r--. 1 root root  939K Mar 28 15:08 libmtmd.so.0.0.
+#12 0.182 drwxr-xr-x. 2 root root    22 Mar 28 15:08 pkgconfig
+#12 0.182 
+#12 0.182 === Verifying CUDA linkage for libggml-cuda.so ===
+#12 0.192 	libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12 (0x00007f293f400000)
+#12 0.192 	libcublas.so.12 => /usr/local/cuda/lib64/libcublas.so.12 (0x00007f2938a00000)
+#12 0.192 	libcuda.so.1 => not found
+#12 0.192 	libcublasLt.so.12 => /usr/local/cuda/lib64/libcublasLt.so.12 (0x00007f2916c00000)
+#12 0.192 
+#12 0.192 === Checking llama-cpp-python version ===
+#12 0.502 WARNING: Package(s) not found: llama-cpp-python
+#12 0.550 !!! VERIFICATION FAILED - See output above !!!
+#12 ERROR: process "/bin/sh -c echo \"=== Checking installed files ===\" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/ &&     echo \"\" &&     echo \"=== Checking CUDA libraries ===\" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/lib/ &&     echo \"\" &&     echo \"=== Verifying CUDA linkage for libggml-cuda.so ===\" &&     ldd /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml-cuda.so | grep -E \"cuda|not found\" &&     echo \"\" &&     echo \"=== Checking llama-cpp-python version ===\" &&     /venv/bin/pip show llama-cpp-python &&     echo \"\" &&     echo \"=== Build artifacts verified ===\" ||     (echo \"!!! VERIFICATION FAILED - See output above !!!\" && exit 1)" did not complete successfully: exit code: 1
+------
+ > [stage-0  8/10] RUN echo "=== Checking installed files ===" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/ &&     echo "" &&     echo "=== Checking CUDA libraries ===" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/lib/ &&     echo "" &&     echo "=== Verifying CUDA linkage for libggml-cuda.so ===" &&     ldd /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml-cuda.so | grep -E "cuda|not found" &&     echo "" &&     echo "=== Checking llama-cpp-python version ===" &&     /venv/bin/pip show llama-cpp-python &&     echo "" &&     echo "=== Build artifacts verified ===" ||     (echo "!!! VERIFICATION FAILED - See output above !!!" && exit 1):
+0.182 
+0.182 === Verifying CUDA linkage for libggml-cuda.so ===
+0.192 	libcudart.so.12 => /usr/local/cuda/lib64/libcudart.so.12 (0x00007f293f400000)
+0.192 	libcublas.so.12 => /usr/local/cuda/lib64/libcublas.so.12 (0x00007f2938a00000)
+0.192 	libcuda.so.1 => not found
+0.192 	libcublasLt.so.12 => /usr/local/cuda/lib64/libcublasLt.so.12 (0x00007f2916c00000)
+0.192 
+0.192 === Checking llama-cpp-python version ===
+0.502 WARNING: Package(s) not found: llama-cpp-python
+0.550 !!! VERIFICATION FAILED - See output above !!!
+------
+Dockerfile.base:79
+--------------------
+  78 |     # Layer 3: Verify build artifacts and library linkage
+  79 | >>> RUN echo "=== Checking installed files ===" && \
+  80 | >>>     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/ && \
+  81 | >>>     echo "" && \
+  82 | >>>     echo "=== Checking CUDA libraries ===" && \
+  83 | >>>     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/lib/ && \
+  84 | >>>     echo "" && \
+  85 | >>>     echo "=== Verifying CUDA linkage for libggml-cuda.so ===" && \
+  86 | >>>     ldd /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml-cuda.so | grep -E "cuda|not found" && \
+  87 | >>>     echo "" && \
+  88 | >>>     echo "=== Checking llama-cpp-python version ===" && \
+  89 | >>>     /venv/bin/pip show llama-cpp-python && \
+  90 | >>>     echo "" && \
+  91 | >>>     echo "=== Build artifacts verified ===" || \
+  92 | >>>     (echo "!!! VERIFICATION FAILED - See output above !!!" && exit 1)
+  93 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c echo \"=== Checking installed files ===\" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/ &&     echo \"\" &&     echo \"=== Checking CUDA libraries ===\" &&     ls -lah /venv/lib/python3.12/site-packages/llama_cpp/lib/ &&     echo \"\" &&     echo \"=== Verifying CUDA linkage for libggml-cuda.so ===\" &&     ldd /venv/lib/python3.12/site-packages/llama_cpp/lib/libggml-cuda.so | grep -E \"cuda|not found\" &&     echo \"\" &&     echo \"=== Checking llama-cpp-python version ===\" &&     /venv/bin/pip show llama-cpp-python &&     echo \"\" &&     echo \"=== Build artifacts verified ===\" ||     (echo \"!!! VERIFICATION FAILED - See output above !!!\" && exit 1)" did not complete successfully: exit code: 1
