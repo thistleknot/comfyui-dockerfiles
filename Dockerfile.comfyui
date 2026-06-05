@@ -6,6 +6,7 @@ ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
 ENV PYOPENGL_PLATFORM=osmesa
 ENV UV_LINK_MODE=copy
+ENV CUDA_HOME=/usr/local/cuda
 WORKDIR /default-comfyui-bundle
 
 # Layer 1: Clone ComfyUI + Manager
@@ -44,7 +45,9 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/uv pip install --cache-dir=/pip-cache --no-build-isolation -r /tmp/requirements_no_nvdiff.txt
 
 # Layer 2b: Install nvdiffrast separately with proper PyTorch visibility
-RUN --mount=type=cache,target=/pip-cache,id=pip-external \
+RUN --mount=type=cache,target=/pip-cache,id=pip-cache \
+    sed -i "s|CUDA_HOME = _find_cuda_home().*|CUDA_HOME = '/usr/local/cuda'|" \
+        /venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py && \
     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation \
     git+https://github.com/NVlabs/nvdiffrast.git
 
@@ -76,9 +79,18 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --no-deps dghs-imgutils && \
     /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 && \
     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
-    /venv/bin/pip uninstall -y onnxruntime 2>/dev/null || true && \
-    /venv/bin/pip install --no-deps onnxruntime-gpu && \
+    /venv/bin/pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true && \
+    /venv/bin/pip install --cache-dir=/pip-cache onnxruntime-gpu && \
+    /venv/bin/pip install --cache-dir=/pip-cache boto3 && \
+    /venv/bin/pip install --cache-dir=/pip-cache lmdb albumentations && \
     /venv/bin/pip install --cache-dir=/pip-cache comfyui-manager && \
+    /venv/bin/pip install --cache-dir=/pip-cache comfy-env && \
+    if [ -d custom_nodes/ComfyUI-SAM3 ] && [ -f custom_nodes/ComfyUI-SAM3/install.py ]; then \
+        cd custom_nodes/ComfyUI-SAM3 && \
+        /venv/bin/pip install --cache-dir=/pip-cache -r requirements.txt --upgrade && \
+        /venv/bin/python install.py && \
+        cd /default-comfyui-bundle/ComfyUI; \
+    fi && \
     python3 - << 'EOF'
 import pathlib
 p = pathlib.Path("/default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI-SAM3/prestartup_script.py")

@@ -120,3 +120,5 @@ twri/sdxl_prompt_styler
 kijai/ComfyUI-Florence2
 un-seen/comfyui-tensorops
 WhatDreamsCost/WhatDreamsCost-ComfyUI
+vrgamegirl19/comfyui-vrgamedevgirl
+wallish77/wlsh_nodes

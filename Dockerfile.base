@@ -2,6 +2,7 @@ FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
 ENV TORCH_CUDA_ARCH_LIST="5.0"
 ENV CUDA_ARCHITECTURES="50"
+ENV TORCH_CUDA_ARCH_LIST="5.0"
 ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Layer 0: System packages
@@ -87,6 +88,7 @@ RUN echo "=== Checking installed files ===" && \
     echo "" && \
     echo "=== Build artifacts verified ===" || \
     (echo "!!! VERIFICATION FAILED - See output above !!!" && exit 1)
+
 
 # Layer 4: Flash-attn (use prebuilt if available)
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \

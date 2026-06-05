@@ -19,6 +19,7 @@ cuda-python>=12.6.0
 # Version 2.6.3 provides _wrapped_flash_attn_backward API required by diffusers 0.30.0
 flash-attn==2.6.3
 diffusers==0.30.0
+transformers>=4.40.0,<5.0.0
 
 # OpenCV with extended image processing modules for LayerStyle nodes
 # Provides guidedFilter and other ximgproc functions
@@ -29,3 +30,7 @@ diffusers==0.30.0
 # Used by: Impact Pack, FizzNodes, ControlNet Aux (face/pose/depth detection)
 #onnxruntime-gpu
 numpy<2.0
+
+kornia==0.7.3
+fal-client
+replicate
