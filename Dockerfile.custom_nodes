@@ -138,6 +138,13 @@ RUN if [ -f /tmp/custom_node_special_pulls.txt ]; then \
         echo "=== No special pulls configured ===" | tee -a /install_logs/install.log; \
     fi
 
+# Patch known broken custom nodes before staging
+RUN if [ -f /custom_nodes_staged/ComfyUI-KJNodes/nodes/ideogram4_nodes.py ]; then \
+        sed -i 's/min(100, brightness)/min(100, float(brightness))/g' \
+            /custom_nodes_staged/ComfyUI-KJNodes/nodes/ideogram4_nodes.py && \
+        echo "Patched KJNodes ideogram4_nodes"; \
+    fi
+
 ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 
