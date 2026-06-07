@@ -46,11 +46,12 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
 
 # Layer 2b: Install nvdiffrast separately with proper PyTorch visibility
 RUN --mount=type=cache,target=/pip-cache,id=pip-cache \
+    /venv/bin/pip install --cache-dir=/pip-cache --force-reinstall torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu126 --no-deps && \
     sed -i "s|CUDA_HOME = _find_cuda_home().*|CUDA_HOME = '/usr/local/cuda'|" \
         /venv/lib/python3.12/site-packages/torch/utils/cpp_extension.py && \
     /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation \
     git+https://github.com/NVlabs/nvdiffrast.git
-
+	
 # Layer 2c: GroundingDINO with PyTorch 2.x patch
 RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     git clone https://github.com/IDEA-Research/GroundingDINO.git /tmp/GroundingDINO && \
