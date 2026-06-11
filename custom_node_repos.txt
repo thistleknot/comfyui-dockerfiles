@@ -91,13 +91,10 @@ SparknightLLC/ComfyUI-LatentClamp
 Clybius/ComfyUI-Latent-Modifiers
 kuschanow/ComfyUI-Advanced-Latent-Control
 SeanScripts/ComfyUI-Unload-Model
-SparknightLLC/ComfyUI-GPENO
-kuschanow/ComfyUI-Advanced-Latent-Control
 PozzettiAndrea/ComfyUI-SAM3
 tungdop2/Comfyui_face_restorer
 Lightricks/ComfyUI-LTXVideo
 numz/ComfyUI-SeedVR2_VideoUpscaler
-GACLove/ComfyUI-VFI
 silveroxides/ComfyUI_RIFE_TensorRT_Auto
 yuvraj108c/ComfyUI-Rife-Tensorrt
 ShmuelRonen/ComfyUI_wav2lip
@@ -122,3 +119,4 @@ un-seen/comfyui-tensorops
 WhatDreamsCost/WhatDreamsCost-ComfyUI
 vrgamegirl19/comfyui-vrgamedevgirl
 wallish77/wlsh_nodes
+DesertPixelAi/ComfyUI-DP-Ideogram-Character
