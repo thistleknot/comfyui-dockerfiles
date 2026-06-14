@@ -120,3 +120,4 @@ WhatDreamsCost/WhatDreamsCost-ComfyUI
 vrgamegirl19/comfyui-vrgamedevgirl
 wallish77/wlsh_nodes
 DesertPixelAi/ComfyUI-DP-Ideogram-Character
+IAMCCS/IAMCCS-nodes
