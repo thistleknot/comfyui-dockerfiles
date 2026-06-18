@@ -121,3 +121,6 @@ vrgamegirl19/comfyui-vrgamedevgirl
 wallish77/wlsh_nodes
 DesertPixelAi/ComfyUI-DP-Ideogram-Character
 IAMCCS/IAMCCS-nodes
+#welltop-cn/ComfyUI-TeaCache
+liconstudio/ComfyUI-Licon-MSR
+kijai/ComfyUI-PromptRelay
