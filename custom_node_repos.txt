@@ -124,3 +124,4 @@ IAMCCS/IAMCCS-nodes
 #welltop-cn/ComfyUI-TeaCache
 liconstudio/ComfyUI-Licon-MSR
 kijai/ComfyUI-PromptRelay
+jamesWalker55/comfyui-various
