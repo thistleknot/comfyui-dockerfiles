@@ -4,7 +4,7 @@ ENV PATH="/venv/bin:${PATH}"
 ENV VIRTUAL_ENV="/venv"
 ENV PYTHONPATH="/default-comfyui-bundle/ComfyUI"
 ENV PYTHONWARNINGS="ignore::SyntaxWarning"
-ENV PYOPENGL_PLATFORM=osmesa
+ENV PYOPENGL_PLATFORM=egl
 ENV UV_LINK_MODE=copy
 ENV CUDA_HOME=/usr/local/cuda
 WORKDIR /default-comfyui-bundle
@@ -101,7 +101,7 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
     /venv/bin/pip install --no-deps opencv-contrib-python==4.13.0.92 && \
     /venv/bin/uv pip install --cache-dir=/pip-cache pycocotools && \
     /venv/bin/pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true && \
-    /venv/bin/pip install --cache-dir=/pip-cache onnxruntime-gpu && \
+    /venv/bin/pip install --cache-dir=/pip-cache onnxruntime-gpu==1.22.0 && \
     /venv/bin/pip install --cache-dir=/pip-cache boto3 && \
     /venv/bin/pip install --cache-dir=/pip-cache lmdb albumentations && \
     /venv/bin/pip install --cache-dir=/pip-cache comfyui-manager && \
@@ -149,9 +149,9 @@ RUN mkdir -p \
     /default-comfyui-bundle/ComfyUI/custom_nodes/ComfyUI_wav2lip/Wav2Lip/checkpoints \
     /default-comfyui-bundle/ComfyUI/models/animatediff_models
 
-# Layer 5: Initialize ComfyUI (download models, setup nodes) without running server
-# Note: NVML and AnimateDiff warnings are expected during CPU-only init
-RUN python3 main.py --cpu --listen --force-fp32 --disable-cuda-malloc 2>&1 | tee /tmp/init.log & sleep 180; kill $! 2>/dev/null || true
+# Layer 5: DB and settings initialize on first real startup with GPU.
+# CPU-only smoke test removed: comfy_kitchen/triton requires an active CUDA
+# driver at decorator-evaluation time, which is unavailable in docker build.
 
 # Layer 6: Update config to enable custom node installation
 RUN cat > /tmp/update_config.py << 'EOF'

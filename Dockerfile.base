@@ -1,8 +1,8 @@
 FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
 
-ENV TORCH_CUDA_ARCH_LIST="5.0"
-ENV CUDA_ARCHITECTURES="50"
-ENV TORCH_CUDA_ARCH_LIST="5.0"
+ENV TORCH_CUDA_ARCH_LIST="6.1"
+ENV CUDA_ARCHITECTURES="61"
+ENV TORCH_CUDA_ARCH_LIST="6.1"
 ENV LD_LIBRARY_PATH="/usr/lib:/usr/lib64:/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
 # Layer 0: System packages
@@ -41,8 +41,8 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
         git clone https://github.com/JamePeng/llama-cpp-python /tmp/llama-cpp-python && \
         cd /tmp/llama-cpp-python && \
         git submodule update --init --recursive && \
-        sed -i '27s/"native"/"50"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt && \
-        CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=50 -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/cuda/lib64/stubs" \
+        sed -i '27s/"native"/"61"/' vendor/llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt && \
+        CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=61 -DGGML_NATIVE=OFF -DGGML_AVX2=ON -DCMAKE_EXE_LINKER_FLAGS=-L/usr/local/cuda/lib64/stubs" \
         /venv/bin/pip install --cache-dir=/pip-cache --no-build-isolation --force-reinstall .; \
     fi
 
@@ -66,7 +66,7 @@ RUN if [ -f /tmp/prebuilt/llama_cpp.tar.gz ] && [ -s /tmp/prebuilt/llama_cpp.tar
         export LD_LIBRARY_PATH="$CUDA_STUBS_DIR:$LD_LIBRARY_PATH" && \
         cmake -B build \
           -DGGML_CUDA=ON \
-          -DCMAKE_CUDA_ARCHITECTURES=50 \
+          -DCMAKE_CUDA_ARCHITECTURES=61 \
           -DGGML_NATIVE=OFF \
           -DLLAMA_CURL=OFF \
           -DCMAKE_EXE_LINKER_FLAGS="-L/usr/local/cuda/lib64/stubs" && \
@@ -96,8 +96,9 @@ RUN --mount=type=cache,target=/pip-cache,id=pip-external \
         echo "=== Using prebuilt flash_attn ===" && \
         tar xzf /tmp/prebuilt/flash_attn.tar.gz -C /; \
     else \
-        /venv/bin/pip install --no-build-isolation flash-attn==2.6.3 2>&1 | tee /build_warnings.txt || \
-        echo "? flash-attn install failed (expected on compute 5.0)" | tee -a /build_warnings.txt; \
+        /venv/bin/pip install --cache-dir=/pip-cache setuptools wheel && \
+        /venv/bin/pip install --no-build-isolation flash-attn==2.8.3+cu126torch2.6 2>&1 | tee /build_warnings.txt || \
+        echo "? flash-attn install failed (expected on compute 6.1)" | tee -a /build_warnings.txt; \
     fi
 
 # Layer 5: Fix diffusers compatibility (solves the original import error)

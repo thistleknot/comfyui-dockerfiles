@@ -17,8 +17,8 @@ tensorrt-cu12>=10.0.0
 cuda-python>=12.6.0,<13.0.0
 
 # Flash Attention pinned for SeedVR2 video upscaler compatibility
-# Version 2.6.3 provides _wrapped_flash_attn_backward API required by diffusers 0.30.0
-flash-attn==2.6.3
+# Version 2.6/8?.3 provides _wrapped_flash_attn_backward API required by diffusers 0.30.0
+flash-attn==2.8.3+cu126torch2.6
 diffusers==0.30.0
 transformers>=4.40.0,<5.0.0
 
