@@ -116,7 +116,6 @@ Windecay/ComfyUI-ReservedVRAM
 twri/sdxl_prompt_styler
 kijai/ComfyUI-Florence2
 un-seen/comfyui-tensorops
-WhatDreamsCost/WhatDreamsCost-ComfyUI
 vrgamegirl19/comfyui-vrgamedevgirl
 wallish77/wlsh_nodes
 DesertPixelAi/ComfyUI-DP-Ideogram-Character
@@ -125,3 +124,5 @@ IAMCCS/IAMCCS-nodes
 liconstudio/ComfyUI-Licon-MSR
 kijai/ComfyUI-PromptRelay
 jamesWalker55/comfyui-various
+WhatDreamsCost/WhatDreamsCost-ComfyUI
+exportAnything/ComfyUI-LTX-Director-Motion-Brush

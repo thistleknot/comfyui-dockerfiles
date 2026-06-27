@@ -105,7 +105,7 @@ facexlib
 rotary-embedding-torch
 colored
 polygraphy
-tensorrt
+tensorrt-cu12
 lpips
 oidn>=0.2
 

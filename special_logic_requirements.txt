@@ -9,11 +9,12 @@ dghs-imgutils[gpu]
 
 # TensorRT for RIFE frame interpolation nodes (ComfyUI_RIFE_TensorRT_Auto, ComfyUI-Rife-Tensorrt)
 # Requires build isolation for proper CUDA detection - cannot use --no-build-isolation
-tensorrt-cu13>=10.0.0
+tensorrt-cu12>=10.0.0
 
 # CUDA Python bindings required by TensorRT nodes for cudart access
 # Provides cuda.bindings.runtime and cuda.bindings.driver modules
-cuda-python>=12.6.0
+# Must stay below 13.x or it pulls libcudart.so.13 into a cu126 image
+cuda-python>=12.6.0,<13.0.0
 
 # Flash Attention pinned for SeedVR2 video upscaler compatibility
 # Version 2.6.3 provides _wrapped_flash_attn_backward API required by diffusers 0.30.0
@@ -28,7 +29,9 @@ transformers>=4.40.0,<5.0.0
 # ONNX Runtime with CUDA acceleration for GPU inference
 # Must install AFTER custom node requirements to override CPU-only onnxruntime
 # Used by: Impact Pack, FizzNodes, ControlNet Aux (face/pose/depth detection)
-#onnxruntime-gpu
+# Pinned to last cu12 default wheel — 1.23+ defaults to cu13 and breaks Pascal
+# fix for reactor and 
+onnxruntime-gpu==1.22.0
 numpy<2.0
 
 kornia==0.7.3
